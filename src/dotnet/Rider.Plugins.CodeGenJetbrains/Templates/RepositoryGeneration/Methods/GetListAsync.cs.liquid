@@ -1,0 +1,49 @@
+public async Task<{{ EntityList.Name }}> GetListAsync(
+    int? offset = null,
+    int? limit = null,
+    CancellationToken cancellationToken = default)
+{
+    const string dataSql =
+        $"""
+        SELECT
+            {%- for prop in Properties %}
+            {{ Table.Name }}.{{ prop.Column }} AS {nameof({{Entity.Name}}.{{ prop.Name }})}{% unless forloop.last %},{%endunless%}
+            {%- endfor %}
+        FROM {{ Table.FullName }}
+        ORDER BY todo DESC
+        LIMIT @Limit
+        OFFSET @Offset
+        """;
+
+    const string countSql =
+        """
+        SELECT COUNT(*)
+        FROM {{ Table.FullName }}
+        """;
+
+    var parameters = new {};
+
+    var definition = new CommandDefinition(
+        dataSql,
+        parameters,
+        transaction: _unitOfWork.Transaction,
+        cancellationToken: cancellationToken);
+
+    var data = await _unitOfWork.Connection.QueryAsync<{{Entity.Name}}>(definition);
+
+    var countCommand = new CommandDefinition(
+        countSql,
+        parameters,
+        transaction: _unitOfWork.Transaction,
+        cancellationToken: cancellationToken);
+
+    var count = await _unitOfWork.Connection.ExecuteScalarAsync<int>(countCommand);
+
+    return new {{ EntityList.Name }}
+    {
+        TotalCount = count,
+        Offset = offset ?? 0,
+        Limit = limit ?? 100,
+        List = data.ToList()
+    };
+}

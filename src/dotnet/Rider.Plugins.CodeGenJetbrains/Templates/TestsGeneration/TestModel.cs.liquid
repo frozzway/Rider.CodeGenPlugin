@@ -1,0 +1,16 @@
+using System.Net;
+using {{ Test.Request.Type.Namespace }};
+
+namespace {{ Type.Namespace }};
+
+public class {{ Type.Name }} : BaseTestModel
+{
+    public {{ Test.Request.Type.Name }} Request { get; set; }
+    public TestCaseExpectations Expected { get; set; }
+    
+    public class TestCaseExpectations
+    {
+        public HttpStatusCode ResponseStatusCode { get; set; }
+        public string? ErrorMessage { get; set; }
+    }
+}

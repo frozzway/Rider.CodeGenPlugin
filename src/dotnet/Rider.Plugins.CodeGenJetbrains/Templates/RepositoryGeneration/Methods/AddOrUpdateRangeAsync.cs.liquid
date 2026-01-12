@@ -1,0 +1,52 @@
+public async Task AddOrUpdateRangeAsync(
+    IEnumerable<{{ Entity.Name }}> entities,
+    CancellationToken cancellationToken)
+{
+    var items = entities
+        .Where(i => i.Created || i.Updated)
+        .ToArray();
+
+    if (items.Length == 0)
+        return;
+
+    var parameters = new
+    {
+        {%- for prop in Properties %}
+        {{ prop.Name }}Arr = items.Select(x => x.{{ prop.Name }}).ToArray(){% unless forloop.last %},{%endunless%}
+        {%- endfor %}
+    };
+
+    const string sql =
+        $"""
+        INSERT INTO {{ Table.FullName }}
+        (
+            {%- for prop in Properties %}
+            {{ prop.Column }}{% unless forloop.last %},{%endunless%}
+            {%- endfor %}
+        )
+        SELECT *
+        FROM unnest(
+            {%- for prop in Properties %}
+            @{nameof(parameters.{{ prop.Name }}Arr)}{% unless forloop.last %},{%endunless%}
+            {%- endfor %}
+        ) AS p(
+            {%- for prop in Properties %}
+            {{ prop.Column }}{% unless forloop.last %},{%endunless%}
+            {%- endfor %}
+        )
+        ON CONFLICT () DO UPDATE SET
+            {%- assign updateProperties = Properties | where: "IsPrimaryKey", false -%}
+            {%- for prop in updateProperties %}
+            {{ prop.Column }} = EXCLUDED.{{ prop.Column }}{% unless forloop.last %},{%endunless%}
+            {%- endfor %}
+        RETURNING id;
+        """;
+
+    var definition = new CommandDefinition(
+        sql,
+        parameters,
+        transaction: _unitOfWork.Transaction,
+        cancellationToken: cancellationToken);
+
+    await _unitOfWork.Connection.ExecuteAsync(definition);
+}

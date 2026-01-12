@@ -1,0 +1,26 @@
+<idea-plugin require-restart="true">
+    <id>com.jetbrains.rider.plugins.codegenjetbrains</id>
+    <name>RiderCodeGenJetbrains</name>
+    <version>1.0.0</version>
+    <vendor url="https://github.com/frozzway">Aleksandr Okunev</vendor>
+    <depends>com.intellij.modules.rider</depends>
+    <depends>com.intellij.database</depends>
+
+    <description>
+        Just some useful utils for code generation
+    </description>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="com.jetbrains.rider.plugins.codegenjetbrains.DatabaseSchemaListener"/>
+    </extensions>
+
+    <actions>
+        <group id="com.jetbrains.rider.plugins.codegenjetbrains.actions.CodeGenActionGroup"
+               class="com.jetbrains.rider.plugins.codegenjetbrains.actions.CodeGenActionGroup"
+               popup="true">
+            <add-to-group group-id="SolutionExplorerPopupMenu" anchor="last"/>
+            <action id="create-test-action-id" class="com.jetbrains.rider.plugins.codegenjetbrains.actions.CreateTestAction" />
+            <action id="generate-repository-action-id" class="com.jetbrains.rider.plugins.codegenjetbrains.actions.GenerateRepositoryAction" />
+        </group>
+    </actions>
+</idea-plugin>

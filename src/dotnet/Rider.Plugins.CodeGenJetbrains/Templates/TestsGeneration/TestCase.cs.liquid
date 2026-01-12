@@ -1,0 +1,23 @@
+using System.Net;
+using {{ Test.TestModel.Type.Namespace }};
+using {{ Test.Request.Type.Namespace }};
+
+namespace {{ Type.Namespace }};
+
+public class {{ Type.Name }} : {{ Test.TestModel.Type.Name }}
+{
+    public {{ Type.Name }}()
+    {
+        TestName = "{{ Name }}";
+        AuthContext = new AuthContext {};
+        DbInitData = new DbInitDataModel {};
+        Request = Fixture
+            .Build<{{ Test.Request.Type.Name }}>()
+            .Create();
+
+        Expected = new TestCaseExpectations
+        {
+            ResponseStatusCode = HttpStatusCode.Created,
+        };
+    }
+}

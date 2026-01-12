@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
+
+    <Import Project="$(JetBrainsRiderRdBackendCommonReference)" Condition="Exists('$(JetBrainsRiderRdBackendCommonReference)')"/>
+
+    <Target Name="AliasSystemRuntime"
+            AfterTargets="ResolveReferences"
+            BeforeTargets="CoreCompile">
+        <ItemGroup>
+            <ReferencePath Update="@(ReferencePath)"
+                           Condition="'%(ReferencePath.FileName)' == 'System.Runtime'">
+                <Aliases>global,rt</Aliases>
+            </ReferencePath>
+        </ItemGroup>
+    </Target>
+
+    <ItemGroup>
+        <PackageReference Include="Humanizer.Core" Version="3.0.1" />
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="8.0.22" />
+        <Reference Include="PresentationCore">
+            <HintPath>Assemblies\PresentationCore.dll</HintPath>
+        </Reference>
+        <EmbeddedResource Include="Templates\**\*.liquid" >
+            <WithCulture>false</WithCulture>
+        </EmbeddedResource>
+        <PackageReference Include="Fluid.Core" Version="2.31.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="FluidModels\TestsGeneration\" />
+    </ItemGroup>
+
+</Project>

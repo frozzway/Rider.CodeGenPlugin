@@ -1,0 +1,36 @@
+public async Task<Guid> AddOrUpdateAsync(
+    {{Entity.Name}} entity,
+    CancellationToken cancellationToken)
+{
+    if(!(entity.Updated || entity.Created))
+        return entity.Id;
+
+    const string sql =
+        $"""
+        INSERT INTO {{ Table.FullName }}
+        (
+            {%- for prop in Properties %}
+            {{ prop.Column }}{% unless forloop.last %},{%endunless%}
+            {%- endfor %}
+        )
+        VALUES (
+            {%- for prop in Properties %}
+            @{nameof({{Entity.Name}}.{{ prop.Name }})}{% unless forloop.last %},{%endunless%}
+            {%- endfor %}
+        )
+        ON CONFLICT (id) DO UPDATE SET
+            {%- assign updateProperties = Properties | where: "IsPrimaryKey", false -%}
+            {%- for prop in updateProperties  %}
+            {{ prop.Column }} = EXCLUDED.{{ prop.Column }}{% unless forloop.last %},{%endunless%}
+            {%- endfor %}
+        RETURNING id;
+        """;
+
+    var cd = new CommandDefinition(
+        sql,
+        entity,
+        transaction: _unitOfWork.Transaction,
+        cancellationToken: cancellationToken);
+
+    return await _unitOfWork.Connection.ExecuteScalarAsync<Guid>(cd);
+}

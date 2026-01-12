@@ -1,0 +1,17 @@
+using System.Collections;
+using {{ Test.TestCase.Type.Namespace }};
+
+namespace {{ Type.Namespace }};
+
+public class {{ Type.Name }} : IEnumerable<object[]>
+{
+    public IEnumerator<object[]> GetEnumerator()
+    {
+        yield return [new {{ Test.TestCase.Type.Name }}()];
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+}

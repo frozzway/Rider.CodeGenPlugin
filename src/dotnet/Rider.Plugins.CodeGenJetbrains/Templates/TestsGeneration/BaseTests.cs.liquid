@@ -1,0 +1,43 @@
+{% if Test.AssertRequest != null -%}
+using {{ Test.AssertRequest.ResponseActType.Namespace }};
+using {{ Test.AssertRequest.ResponseAssertType.Namespace }};
+
+{% endif -%}
+namespace {{ Type.Namespace }};
+
+public class {{ Type.Name }}(DbFixture dbFixture, ITestOutputHelper output) : BaseTestFixture(dbFixture, output)
+{
+    [Theory]
+    [ClassData(typeof({{ Test.TestSuite.Type.Name }}))]
+    public async Task {{ TheoryName }}({{ Test.TestModel.Type.Name }} testCase)
+    {
+        await using var db = await DbState.CreateAsync(ServiceScope, testCase.DbInitData);
+
+        Client.UseAuthContext(testCase.AuthContext);
+
+        // act
+        var response = await Client.PostAsJsonAsync("{{ Test.Request.Endpoint }}", testCase.Request);
+
+        // assert
+        await response.ShouldHaveStatusCodeAsync(testCase.Expected.ResponseStatusCode);
+
+        if (!string.IsNullOrEmpty(testCase.Expected.ErrorMessage))
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            errorContent.Should().Contain(testCase.Expected.ErrorMessage);
+            return;
+        }
+        {%- if Test.AssertRequest != null %}
+
+        var content = await response.Content.ReadFromJsonAsync<{{ Test.AssertRequest.ResponseActType.Name }}>();
+        content.Should().NotBeNull();
+
+        response = await Client.GetAsync($"{{ Test.AssertRequest.Endpoint }}{content!.Id}");
+        await response.ShouldHaveStatusCodeAsync(HttpStatusCode.OK);
+
+        var entity = await response.Content.ReadFromJsonAsync<{{ Test.AssertRequest.ResponseAssertType.Name }}>();
+
+        entity.Should().BeEquivalentTo(testCase.Request, config => config.ExcludingMissingMembers());
+        {%- endif %}
+    }
+}
