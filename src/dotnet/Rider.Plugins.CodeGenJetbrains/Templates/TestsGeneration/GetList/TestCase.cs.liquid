@@ -1,0 +1,42 @@
+using System.Net;
+using {{ Test.TestModel.Type.Namespace }};
+using {{ Test.Request.Type.Namespace }};
+using {{ Test.Entity.Type.Namespace }};
+
+namespace {{ Type.Namespace }};
+
+public class {{ Type.Name }} : {{ Test.TestModel.Type.Name }}
+{
+    const int Count = 100;
+
+    public {{ Type.Name }}()
+    {
+        var entities = CreateEntities(Count);
+
+        TestName = "{{ Name }}";
+        AuthContext = new AuthContext {};
+        DbInitData = new DbInitDataModel
+        {
+            {{ Test.Entity.PluralName }} = entities
+        };
+        Request = Fixture
+            .Build<{{ Test.Request.Type.Name }}>()
+            .With(i => i.Limit, Count)
+            .With(i => i.Offset, 0)
+            .Create();
+
+        Expected = new TestCaseExpectations
+        {
+            ResponseStatusCode = HttpStatusCode.OK,
+            Entities = entities.ToArray(),
+            TotalCount = Count
+        };
+    }
+
+    private {{ Test.Entity.Type.Name }}[] CreateEntities(int count)
+        => Enumerable.Range(0, count)
+            .Select(_ => Fixture.Build<{{ Test.Entity.Type.Name }}>()
+                .With(i => i.Created, true)
+                .Create())
+            .ToArray();
+}

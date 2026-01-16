@@ -77,8 +77,11 @@ public static class InputFieldFactory
 
         configure?.Invoke(textBox);
 
-        var inputField = new InputField<string>(lifetime, labelText, textBox,
-            currentValue: textBox.Text.Select(lifetime, string.Empty, val => val));
+        var mirrorProp = new Property<string>(Guid.NewGuid().ToString(), textBox.Text.Value);
+        textBox.Text.FlowInto(lifetime, mirrorProp);
+        mirrorProp.FlowInto(lifetime, textBox.Text);
+
+        var inputField = new InputField<string>(lifetime, labelText, textBox, currentValue: mirrorProp);
 
         return inputField;
     }

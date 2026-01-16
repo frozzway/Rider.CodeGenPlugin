@@ -34,7 +34,8 @@ public async Task AddOrUpdateRangeAsync(
             {{ prop.Column }}{% unless forloop.last %},{%endunless%}
             {%- endfor %}
         )
-        ON CONFLICT () DO UPDATE SET
+        {%- assign pkProperties = Properties | where: "IsPrimaryKey", true %}
+        ON CONFLICT ({% for prop in pkProperties %}{{ prop.Column }}{% unless forloop.last %},{%endunless%}{% endfor %}) DO UPDATE SET
             {%- assign updateProperties = Properties | where: "IsPrimaryKey", false -%}
             {%- for prop in updateProperties %}
             {{ prop.Column }} = EXCLUDED.{{ prop.Column }}{% unless forloop.last %},{%endunless%}

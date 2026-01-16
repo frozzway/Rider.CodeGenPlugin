@@ -3,9 +3,9 @@ using JetBrains.Application.UI.ActionsRevised.Menu;
 using JetBrains.ProjectModel;
 using Rider.Plugins.CodeGenJetbrains.Execution.TestsGeneration.Create;
 
-namespace Rider.Plugins.CodeGenJetbrains.Actions;
+namespace Rider.Plugins.CodeGenJetbrains.Actions.TestsGeneration;
 
-[Action("CreateTestActionId", "Create Test")]
+[Action("CreateTestActionId", "[Create] Test")]
 [SolutionComponent(Instantiation.ContainerAsyncAnyThreadUnsafe)]
 public class CreateTestAction : SolutionFolderAction<CreateTestDto>
 {

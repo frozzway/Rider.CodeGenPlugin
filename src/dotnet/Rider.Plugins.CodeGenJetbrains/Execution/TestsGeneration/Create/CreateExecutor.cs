@@ -8,6 +8,10 @@ namespace Rider.Plugins.CodeGenJetbrains.Execution.TestsGeneration.Create;
 
 public class CreateExecutor : BaseExecutor<CreateTestDto>
 {
+    protected override string TestModelTemplate => "TestsGeneration.Create.TestModel.cs.liquid";
+    protected override string TestCaseTemplate => "TestsGeneration.Create.TestCase.cs.liquid";
+    protected override string BaseTestTemplate => "TestsGeneration.Create.BaseTests.cs.liquid";
+
     protected override FTest ToFModel(
         CreateTestDto dto,
         IProjectFolder targetFolder,

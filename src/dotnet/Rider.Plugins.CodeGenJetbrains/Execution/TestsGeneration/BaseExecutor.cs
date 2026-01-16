@@ -12,10 +12,10 @@ namespace Rider.Plugins.CodeGenJetbrains.Execution.TestsGeneration;
 
 public abstract class BaseExecutor<T> : IExecutor<T>
 {
-    private const string TestModelTemplate = "TestsGeneration.TestModel.cs.liquid";
     private const string TestSuiteTemplate = "TestsGeneration.TestSuite.cs.liquid";
-    private const string TestCaseTemplate = "TestsGeneration.TestCase.cs.liquid";
-    private const string BaseTestTemplate = "TestsGeneration.BaseTests.cs.liquid";
+    protected abstract string TestModelTemplate { get; }
+    protected abstract string TestCaseTemplate { get; }
+    protected abstract string BaseTestTemplate { get; }
 
     protected abstract FTest ToFModel(
         T dto,

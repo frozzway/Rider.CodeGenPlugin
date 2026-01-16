@@ -11,6 +11,7 @@ using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.DataContext;
 using JetBrains.ReSharper.Psi;
+using JetBrains.ReSharper.Psi.Util;
 using JetBrains.Rider.Model.UIAutomation;
 using Rider.Plugins.CodeGenJetbrains.Execution.Abstract;
 using Rider.Plugins.CodeGenJetbrains.Execution.Common;
@@ -145,9 +146,10 @@ public class RepositoryGenerationDialogForm(SolutionTypeElementsAccessor classes
         _solution.Locks.ExecuteWithReadLock(() =>
         {
             var entity = _entityPicker.Value.Value;
-            _entityProperties = entity.GetSuperTypes()
+            _entityProperties = entity.GetAllSuperClasses()
                 .Select(type => type.GetTypeElement())
                 .OfType<IClass>()
+                .Where(elem => !elem.IsObjectClass())
                 .SelectMany(elem => elem.Properties).Concat(entity.Properties)
                 .Where(prop => prop.GetAccessRights() == AccessRights.PUBLIC)
                 .Where(prop => !prop.IsStatic)

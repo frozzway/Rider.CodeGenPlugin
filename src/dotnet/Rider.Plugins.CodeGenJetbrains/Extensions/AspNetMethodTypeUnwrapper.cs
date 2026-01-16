@@ -6,7 +6,7 @@ namespace Rider.Plugins.CodeGenJetbrains.Extensions;
 
 public static class AspNetMethodTypeUnwrapper
 {
-    public static ITypeElement? GetUnwrappedTypeElement(this IType type)
+    public static IType? GetUnwrappedType(this IType type)
     {
         // 1. Если это Task<T>, достаем T
         if (type.IsGenericTask() || type.IsGenericValueTask())
@@ -24,7 +24,7 @@ public static class AspNetMethodTypeUnwrapper
                 {
                     // Рекурсивно разворачиваем результат Task-а
                     var innerType = substitution.Apply(typeParam);
-                    return GetUnwrappedTypeElement(innerType);
+                    return GetUnwrappedType(innerType);
                 }
             }
         }
@@ -45,7 +45,7 @@ public static class AspNetMethodTypeUnwrapper
                 {
                     // Рекурсивно разворачиваем результат
                     var innerType = substitution.Apply(typeParam);
-                    return GetUnwrappedTypeElement(innerType);
+                    return GetUnwrappedType(innerType);
                 }
             }
         }
@@ -63,7 +63,7 @@ public static class AspNetMethodTypeUnwrapper
         }
 
         // 5. В остальных случаях считаем, что это и есть наш payload (IdResponse и т.п.)
-        return type.GetTypeElement();
+        return type;
     }
 
     private static bool IsActionResultGeneric(IType type)

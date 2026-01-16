@@ -7,13 +7,18 @@
 
     <Import Project="$(JetBrainsRiderRdBackendCommonReference)" Condition="Exists('$(JetBrainsRiderRdBackendCommonReference)')"/>
 
-    <Target Name="AliasSystemRuntime"
+    <Target Name="AliasAssemblies"
             AfterTargets="ResolveReferences"
             BeforeTargets="CoreCompile">
         <ItemGroup>
             <ReferencePath Update="@(ReferencePath)"
                            Condition="'%(ReferencePath.FileName)' == 'System.Runtime'">
                 <Aliases>global,rt</Aliases>
+            </ReferencePath>
+
+            <ReferencePath Update="@(ReferencePath)"
+                           Condition="'%(ReferencePath.FileName)' == 'Jetbrains.Platform.Core'">
+                <Aliases>global,jb</Aliases>
             </ReferencePath>
         </ItemGroup>
     </Target>

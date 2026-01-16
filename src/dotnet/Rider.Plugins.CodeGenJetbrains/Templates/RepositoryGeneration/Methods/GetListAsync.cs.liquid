@@ -1,6 +1,6 @@
 public async Task<{{ EntityList.Name }}> GetListAsync(
-    int? offset = null,
     int? limit = null,
+    int? offset = null,
     CancellationToken cancellationToken = default)
 {
     const string dataSql =
@@ -21,7 +21,11 @@ public async Task<{{ EntityList.Name }}> GetListAsync(
         FROM {{ Table.FullName }}
         """;
 
-    var parameters = new {};
+    var parameters = new
+    {
+        Limit = limit ?? 100,
+        Offset = offset ?? 0
+    };
 
     var definition = new CommandDefinition(
         dataSql,

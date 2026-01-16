@@ -9,6 +9,7 @@ using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.UI.Automation;
 using JetBrains.ReSharper.Psi;
+using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.Rider.Model.UIAutomation;
 using JetBrains.Util.Media;
 using Rider.Plugins.CodeGenJetbrains.Extensions;
@@ -42,7 +43,7 @@ public static class SandboxElements
         grid.AddElement(BeControls.GetButton("Create SimpleAction.cs".GetBeLabel(), lt, () => CreateFileInFolder(folder)));
         grid.AddElement(BeControls.GetButton("Create SimpleFolder".GetBeLabel(), lt, () => CreateFolder(folder)));
         grid.AddElement(BeControls.GetButton("Debug".GetBeLabel(), lt, () => dialogHost.Show(CreateCheckboxListInDialog)));
-        grid.AddElement(BeControls.GetTextBox(lt, id: $"textbox12345").WithFolderCompletion(folder.GetSolution(), lt));
+        grid.AddElement(BeControls.GetTextBox(lt, id: $"textbox12345").WithTypeCompletionShort(folder.GetSolution(), lt, CSharpLanguage.Instance!));
         grid.AddElement(BeControls.GetTextBox(lt, id: $"textbox12346").WithEndpointsCompletion(folder.GetSolution(), lt));
         grid.AddElement(GetCheckBoxList(lt));
 

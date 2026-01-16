@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Humanizer;
 using JetBrains.Application.DataContext;
 using JetBrains.Application.Threading;
+using JetBrains.Collections.Viewable;
 using JetBrains.IDE.UI;
 using JetBrains.IDE.UI.Extensions;
 using JetBrains.Lifetimes;
@@ -11,6 +12,7 @@ using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.DataContext;
 using JetBrains.ReSharper.Feature.Services.Web.AspRouteTemplates.EndpointsProvider.AspNetHttpEndpoints;
 using JetBrains.ReSharper.Psi;
+using JetBrains.ReSharper.Psi.Util;
 using JetBrains.Rider.Model.UIAutomation;
 using Rider.Plugins.CodeGenJetbrains.Execution.Abstract;
 using Rider.Plugins.CodeGenJetbrains.Execution.Common;
@@ -75,9 +77,6 @@ public class CreateDialogForm(SolutionTypeElementsAccessor solutionTypeElementsA
             .AddInputField(requestEndpointInput, "request-endpoint")
             .AddInputField(requestTypeInput, "request-type");
 
-        var assertCheckbox = BeControls.GetCheckBox("Enable", Guid.NewGuid().ToString(), lifetime)!;
-        assertCheckbox.Property.Advise(lifetime, newValue => _assertForm.Enabled.Value = newValue ?? false);
-
         var assertEndpointInput = InputFieldFactory.CreateTextBox("Assert endpoint:", lifetime, placeholder: DefaultEndpoint,
             configure: box => box.WithEndpointsCompletion(solution, lifetime, FilterByHttpVerb("GET")));
         var responseActTypeInput = new InputField(lifetime, "Response act type:", _assertActTypePicker.Control);
@@ -89,6 +88,9 @@ public class CreateDialogForm(SolutionTypeElementsAccessor solutionTypeElementsA
             .AddInputField(responseAssertTypeInput, "response-assert type");
 
         _assertForm.Enabled.Value = false;
+
+        var assertCheckbox = BeControls.GetCheckBox("Enable", Guid.NewGuid().ToString(), lifetime)!;
+        assertCheckbox.Property.AdviseNotNull(lifetime, newValue => _assertForm.Enabled.Value = newValue);
 
         var assertGrid = BeControls.GetAutoGrid();
         assertGrid.AddElements(assertCheckbox.WithMargin(PluginBeControls.GetMargin(top: 5)), _assertForm.Grid);
@@ -107,7 +109,7 @@ public class CreateDialogForm(SolutionTypeElementsAccessor solutionTypeElementsA
         return grid.InDialog(
             title: title,
             id: Guid.NewGuid().ToString(),
-            isResizable: false,
+            isResizable: true,
             size: new BeControlSizeFixed(
                 width: BeControlSizeType.HUGE,
                 height: BeControlSizeType.FIT_TO_CONTENT));
@@ -143,7 +145,7 @@ public class CreateDialogForm(SolutionTypeElementsAccessor solutionTypeElementsA
             var endpoint = solution.ResolveHttpEndpoint<AspNetHttpEndpoint>(newUrl, httpVerb);
             solution.Locks.ExecuteWithReadLock(() =>
             {
-                var responseType = typeResolver(endpoint)?.GetUnwrappedTypeElement();
+                var responseType = typeResolver(endpoint)?.GetUnwrappedType().GetTypeElement();
                 if (responseType is not IClass typed) return;
                 classPicker.Value.SetValue(typed);
             });
