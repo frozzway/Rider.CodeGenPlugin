@@ -10,13 +10,14 @@ public class {{ Type.Name }} : {{ Test.TestModel.Type.Name }}
         TestName = "{{ Name }}";
         AuthContext = new AuthContext {};
         DbInitData = new DbInitDataModel {};
+        EntityId = specify;
         Request = Fixture
             .Build<{{ Test.Request.Type.Name }}>()
             .Create();
 
         Expected = new TestCaseExpectations
         {
-            ResponseStatusCode = HttpStatusCode.Created,
+            ResponseStatusCode = HttpStatusCode.NoContent,
         };
     }
 }

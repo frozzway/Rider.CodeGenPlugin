@@ -1,8 +1,8 @@
 ﻿using JetBrains.ReSharper.Psi;
 
-namespace Rider.Plugins.CodeGenJetbrains.Execution.TestsGeneration.Create;
+namespace Rider.Plugins.CodeGenJetbrains.Execution.TestsGeneration.Update;
 
-public record CreateTestDto(
+public record UpdateTestDto(
     string FilesPrefix,
     string CaseName,
     string RequestEndpoint,
@@ -10,6 +10,5 @@ public record CreateTestDto(
     AssertRequestDto? AssertRequestInfo);
 
 public record AssertRequestDto(
-    IClass? ResponseActType,
     IClass? ResponseAssertType,
     string RequestAssertEndpoint);

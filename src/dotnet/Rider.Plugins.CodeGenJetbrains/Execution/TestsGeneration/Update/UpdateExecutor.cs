@@ -2,43 +2,43 @@
 using Rider.Plugins.CodeGenJetbrains.Extensions;
 using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Abstract;
 using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models;
-using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models.Create;
+using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models.Update;
 
-namespace Rider.Plugins.CodeGenJetbrains.Execution.TestsGeneration.Create;
+namespace Rider.Plugins.CodeGenJetbrains.Execution.TestsGeneration.Update;
 
-public class CreateExecutor : BaseExecutor<CreateTestDto>
+public class UpdateExecutor : BaseExecutor<UpdateTestDto>
 {
-    protected override string TestModelTemplate => "TestsGeneration.Create.TestModel.cs.liquid";
-    protected override string TestCaseTemplate => "TestsGeneration.Create.TestCase.cs.liquid";
-    protected override string BaseTestTemplate => "TestsGeneration.Create.BaseTests.cs.liquid";
-    protected override string SubFolderName => "Create";
+    protected override string TestModelTemplate => "TestsGeneration.Update.TestModel.cs.liquid";
+    protected override string TestCaseTemplate => "TestsGeneration.Update.TestCase.cs.liquid";
+    protected override string BaseTestTemplate => "TestsGeneration.Update.BaseTests.cs.liquid";
+    protected override string SubFolderName => "Update";
 
     protected override FTest ToFModel(
-        CreateTestDto dto,
+        UpdateTestDto dto,
         IProjectFolder targetFolder,
         IProjectFolder testCasesFolder)
     {
         var folderNamespace = targetFolder.GetExpectedNamespace();
 
-        var fModel = new FCreateTest
+        var fModel = new FUpdateTest
         {
             Request = new FTestRequest
             {
                 Type = dto.RequestType.ToFType(),
                 Endpoint = dto.RequestEndpoint
             },
-            TestCase = new FCreateTestCase
+            TestCase = new FUpdateTestCase
             {
                 Name = dto.CaseName,
                 Type = GetFType(testCasesFolder.GetExpectedNamespace(), dto.FilesPrefix, "_Success")
             },
-            BaseTests = new FCreateBaseTests
+            BaseTests = new FUpdateBaseTests
             {
                 TheoryName = dto.FilesPrefix,
                 Type = GetFType(folderNamespace, dto.FilesPrefix, "Tests"),
             },
-            TestModel = new FCreateTestModel { Type = GetFType(folderNamespace, dto.FilesPrefix, "TestModel") },
-            TestSuite = new FCreateTestSuite { Type = GetFType(folderNamespace, dto.FilesPrefix, "TestSuite") },
+            TestModel = new FUpdateTestModel { Type = GetFType(folderNamespace, dto.FilesPrefix, "TestModel") },
+            TestSuite = new FUpdateTestSuite { Type = GetFType(folderNamespace, dto.FilesPrefix, "TestSuite") },
         };
 
         if (dto.AssertRequestInfo != null)
@@ -46,7 +46,6 @@ public class CreateExecutor : BaseExecutor<CreateTestDto>
             fModel.AssertRequest = new FTestAssertRequest
             {
                 Endpoint = dto.AssertRequestInfo.RequestAssertEndpoint,
-                ResponseActType = dto.AssertRequestInfo.ResponseActType.ToFType(),
                 ResponseAssertType = dto.AssertRequestInfo.ResponseAssertType.ToFType()
             };
         }

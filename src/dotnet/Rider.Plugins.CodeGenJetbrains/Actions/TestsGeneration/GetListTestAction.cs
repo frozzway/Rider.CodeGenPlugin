@@ -9,5 +9,5 @@ namespace Rider.Plugins.CodeGenJetbrains.Actions.TestsGeneration;
 [SolutionComponent(Instantiation.ContainerAsyncAnyThreadUnsafe)]
 public class GetListTestAction : SolutionFolderAction<GetListTestDto>
 {
-    protected override string DialogTitle => "Create test";
+    protected override string DialogTitle => "Create test (GetList)";
 }

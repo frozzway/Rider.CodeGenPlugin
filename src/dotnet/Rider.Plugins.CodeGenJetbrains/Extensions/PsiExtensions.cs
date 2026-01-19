@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Application.Threading;
+using JetBrains.Metadata.Reader.API;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.Web.AspRouteTemplates.EndpointsProvider;
 using JetBrains.ReSharper.Feature.Services.Web.AspRouteTemplates.EndpointsProvider.AspNetHttpEndpoints;
@@ -21,6 +22,9 @@ public static class PsiExtensions
         var matches = scope.GetAllTypeElementsGroupedByName();
         return matches;
     }
+
+    public static bool IsPredefinedType(this IType type, IClrTypeName clrName)
+        => type is IDeclaredType declaredType && declaredType.GetClrName().FullName == clrName.FullName;
 
     public static FType ToFType(this ITypeElement? typeElement)
         => new()

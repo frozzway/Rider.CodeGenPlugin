@@ -4,6 +4,9 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.CreateTestAction
+import com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.GetListTestAction
+import com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.UpdateTestAction
 
 class CodeGenActionGroup : DefaultActionGroup(
     "Code Generation",
@@ -16,6 +19,6 @@ class CodeGenActionGroup : DefaultActionGroup(
     }
 
     override fun getChildren(p0: AnActionEvent?): Array<out AnAction> {
-        return arrayOf(CreateTestAction(), GetListTestAction(), GenerateRepositoryAction())
+        return arrayOf(CreateTestAction(), UpdateTestAction(), GetListTestAction(), GenerateRepositoryAction())
     }
 }

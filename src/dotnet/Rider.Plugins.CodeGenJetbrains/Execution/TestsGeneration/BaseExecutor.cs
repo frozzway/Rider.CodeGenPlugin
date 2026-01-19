@@ -16,6 +16,7 @@ public abstract class BaseExecutor<T> : IExecutor<T>
     protected abstract string TestModelTemplate { get; }
     protected abstract string TestCaseTemplate { get; }
     protected abstract string BaseTestTemplate { get; }
+    protected abstract string SubFolderName { get; }
 
     protected abstract FTest ToFModel(
         T dto,
@@ -32,18 +33,24 @@ public abstract class BaseExecutor<T> : IExecutor<T>
         GenerateImpl(folder, dto);
     }
 
-    protected virtual void GenerateImpl(IProjectFolder targetFolder, T dto)
+    protected virtual void GenerateImpl(IProjectFolder selectedFolder, T dto)
     {
         const string testCaseFolderName = "TestCases";
 
-        var testCasesFolder = targetFolder.GetSubFoldersWithLock(testCaseFolderName).FirstOrDefault()
-                              ?? targetFolder.CreateFolder(testCaseFolderName);
+        if (selectedFolder.Name != SubFolderName)
+        {
+            selectedFolder = selectedFolder.GetSubFoldersWithLock(SubFolderName).FirstOrDefault()
+                             ?? selectedFolder.CreateFolder(SubFolderName);
+        }
 
-        var fModel = ToFModel(dto, targetFolder, testCasesFolder);
+        var testCasesFolder = selectedFolder.GetSubFoldersWithLock(testCaseFolderName).FirstOrDefault()
+                              ?? selectedFolder.CreateFolder(testCaseFolderName);
 
-        GenerateFileFromModel(targetFolder, fModel.TestModel, TestModelTemplate);
-        GenerateFileFromModel(targetFolder, fModel.TestSuite, TestSuiteTemplate);
-        GenerateFileFromModel(targetFolder, fModel.BaseTests, BaseTestTemplate);
+        var fModel = ToFModel(dto, selectedFolder, testCasesFolder);
+
+        GenerateFileFromModel(selectedFolder, fModel.TestModel, TestModelTemplate);
+        GenerateFileFromModel(selectedFolder, fModel.TestSuite, TestSuiteTemplate);
+        GenerateFileFromModel(selectedFolder, fModel.BaseTests, BaseTestTemplate);
         GenerateFileFromModel(testCasesFolder, fModel.TestCase, TestCaseTemplate);
     }
 

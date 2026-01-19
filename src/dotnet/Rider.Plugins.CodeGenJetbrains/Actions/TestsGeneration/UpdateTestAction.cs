@@ -1,13 +1,13 @@
 ﻿using JetBrains.Application.Parts;
 using JetBrains.Application.UI.ActionsRevised.Menu;
 using JetBrains.ProjectModel;
-using Rider.Plugins.CodeGenJetbrains.Execution.TestsGeneration.Create;
+using Rider.Plugins.CodeGenJetbrains.Execution.TestsGeneration.Update;
 
 namespace Rider.Plugins.CodeGenJetbrains.Actions.TestsGeneration;
 
-[Action("CreateTestActionId", "[Create] Test")]
+[Action("UpdateTestActionId", "[Update] Test")]
 [SolutionComponent(Instantiation.ContainerAsyncAnyThreadUnsafe)]
-public class CreateTestAction : SolutionFolderAction<CreateTestDto>
+public class UpdateTestAction : SolutionFolderAction<UpdateTestDto>
 {
-    protected override string DialogTitle => "Create test (Create)";
+    protected override string DialogTitle => "Create test (Update)";
 }

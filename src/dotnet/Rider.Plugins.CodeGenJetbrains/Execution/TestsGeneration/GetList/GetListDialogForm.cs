@@ -23,7 +23,7 @@ namespace Rider.Plugins.CodeGenJetbrains.Execution.TestsGeneration.GetList;
 public class GetListDialogForm(SolutionTypeElementsAccessor solutionTypeElementsAccessor) : IDialogForm<GetListTestDto>
 {
     private string _defaultFilePrefix;
-    private const string DefaultCaseName = "Успешное добавление сущности";
+    private const string DefaultCaseName = "Успешное получение списка сущности";
     private const string DefaultEndpoint = "/api/endpoint/";
     private const string DefaultResponseType = "PagedResponse<>";
 

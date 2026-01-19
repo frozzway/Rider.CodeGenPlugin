@@ -12,6 +12,7 @@ public class GetListExecutor : BaseExecutor<GetListTestDto>
     protected override string TestModelTemplate => "TestsGeneration.GetList.TestModel.cs.liquid";
     protected override string TestCaseTemplate => "TestsGeneration.GetList.TestCase.cs.liquid";
     protected override string BaseTestTemplate => "TestsGeneration.GetList.BaseTests.cs.liquid";
+    protected override string SubFolderName => "GetList";
 
     protected override FTest ToFModel(GetListTestDto dto, IProjectFolder targetFolder, IProjectFolder testCasesFolder)
     {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using JetBrains.Application.UI.Controls.JetPopupMenu;
 using JetBrains.Application.UI.Controls.JetPopupMenu.Detail;
 using JetBrains.Lifetimes;
@@ -175,4 +176,6 @@ public static class EndpointCompletionExtensions
 
         return path.StartsWith("/") ? path : "/" + path;
     }
+
+    public static string RemoveLastPart(this string url) => Regex.Replace(url, @"\{[^}]+\}$", "");
 }
