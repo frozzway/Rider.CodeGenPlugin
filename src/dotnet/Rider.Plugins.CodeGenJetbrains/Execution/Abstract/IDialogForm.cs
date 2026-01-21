@@ -1,7 +1,6 @@
 ﻿using JetBrains.Annotations;
 using JetBrains.Application.DataContext;
 using JetBrains.Lifetimes;
-using JetBrains.ProjectModel;
 using JetBrains.Rider.Model.UIAutomation;
 
 namespace Rider.Plugins.CodeGenJetbrains.Execution.Abstract;

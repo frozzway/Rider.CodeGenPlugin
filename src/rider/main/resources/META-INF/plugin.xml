@@ -1,7 +1,7 @@
 <idea-plugin require-restart="true">
     <id>com.jetbrains.rider.plugins.codegenjetbrains</id>
     <name>RiderCodeGen</name>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
     <vendor url="https://github.com/frozzway">Aleksandr Okunev</vendor>
     <depends>com.intellij.modules.rider</depends>
     <depends>com.intellij.database</depends>
@@ -19,6 +19,7 @@
                class="com.jetbrains.rider.plugins.codegenjetbrains.actions.CodeGenActionGroup"
                popup="true">
             <add-to-group group-id="SolutionExplorerPopupMenu" anchor="last"/>
+            <action id="generate-command-action-id" class="com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.GenerateCommandAction" />
             <action id="create-test-action-id" class="com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.CreateTestAction" />
             <action id="update-test-action-id" class="com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.UpdateTestAction" />
             <action id="get-list-test-action-id" class="com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.GetListTestAction" />

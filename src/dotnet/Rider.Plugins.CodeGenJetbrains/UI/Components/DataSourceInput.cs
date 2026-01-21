@@ -4,7 +4,7 @@ using System.Linq;
 using JetBrains.DataFlow;
 using JetBrains.IDE.UI.Extensions;
 using JetBrains.Lifetimes;
-using Rider.Plugins.CodeGenJetbrains.Execution.RepositoryGeneration;
+using Rider.Plugins.CodeGenJetbrains.Execution.Generation.RepositoryGeneration;
 using Rider.Plugins.CodeGenJetbrains.Extensions;
 using Rider.Plugins.CodeGenJetbrains.Model;
 

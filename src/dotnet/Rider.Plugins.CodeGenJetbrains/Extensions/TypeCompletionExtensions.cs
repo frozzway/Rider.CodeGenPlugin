@@ -35,7 +35,7 @@ public static class TypeCompletionExtensions
     ISolution solution,
     Lifetime lifetime,
     PsiLanguageType language,
-    bool alltypes = false,
+    bool allTypes = false,
     Predicate<IDeclaredElement>? extraFilter = null)
   {
     // Проверка скопирована "как есть"
@@ -45,21 +45,21 @@ public static class TypeCompletionExtensions
     IShellLocks component = Shell.Instance.GetComponent<IShellLocks>();
 
     // Создание TypeChooser скопировано
-    TypeChooser typeChooser = new TypeChooser(lifetime, solution, alltypes ? LibrariesFlag.SolutionAndLibraries : LibrariesFlag.SolutionOnly, language, Shell.Instance.GetComponent<IShellLocks>(), Shell.Instance.GetComponent<IMainWindowPopupWindowContext>());
+    TypeChooser typeChooser = new TypeChooser(lifetime, solution, allTypes ? LibrariesFlag.SolutionAndLibraries : LibrariesFlag.SolutionOnly, language, Shell.Instance.GetComponent<IShellLocks>(), Shell.Instance.GetComponent<IMainWindowPopupWindowContext>());
 
     // Фильтры скопированы "как есть"
     typeChooser.CompletionItemsPassFilter.Value = (Func<IDeclaredElement, bool>) (de =>
     {
       if (language.IsUnmanaged())
         return de.PresentationLanguage.Equals(language);
-      return (de.PresentationLanguage.Equals(language) || de.PresentationLanguage.IsNullOrUnknown()) && (de is ITypeElement || de is ICompiledElement & alltypes) && (extraFilter == null || extraFilter(de));
+      return (de.PresentationLanguage.Equals(language) || de.PresentationLanguage.IsNullOrUnknown()) && (de is ITypeElement || de is ICompiledElement & allTypes) && (extraFilter == null || extraFilter(de));
     });
 
     typeChooser.PickerItemsPassFilter.Value = de =>
     {
         if (language.IsUnmanaged())
             return de.PresentationLanguage.Equals(language);
-        if (!de.PresentationLanguage.Equals(language) && !de.PresentationLanguage.IsNullOrUnknown() || !(de is INamespace) && !(de is ITypeElement) && !(de is ICompiledElement & alltypes))
+        if (!de.PresentationLanguage.Equals(language) && !de.PresentationLanguage.IsNullOrUnknown() || !(de is INamespace) && !(de is ITypeElement) && !(de is ICompiledElement & allTypes))
             return false;
         return extraFilter == null || extraFilter(de);
     };

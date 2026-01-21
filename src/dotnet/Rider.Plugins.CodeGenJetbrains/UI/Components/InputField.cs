@@ -72,7 +72,7 @@ public static class InputFieldFactory
     {
         var textBox = BeControls.GetTextBox(
             lifetime,
-            id: $"textbox_{labelText}",
+            id: Guid.NewGuid().ToString(),
             placeholder: placeholder ?? string.Empty);
 
         configure?.Invoke(textBox);

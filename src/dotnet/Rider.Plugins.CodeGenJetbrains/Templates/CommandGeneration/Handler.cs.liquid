@@ -1,0 +1,11 @@
+using LanguageExt.Common;
+
+namespace {{ Type.Namespace }};
+
+public class {{ Type.Name }}() : IRequestHandler<{{ Base.Command.Type.Name }}, Result<{{ Base.ReturnType }}>>
+{
+    public async Task<Result<{{ Base.ReturnType }}>> Handle({{ Base.Command.Type.Name }} request, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+}

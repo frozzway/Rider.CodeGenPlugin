@@ -19,6 +19,11 @@ class CodeGenActionGroup : DefaultActionGroup(
     }
 
     override fun getChildren(p0: AnActionEvent?): Array<out AnAction> {
-        return arrayOf(CreateTestAction(), UpdateTestAction(), GetListTestAction(), GenerateRepositoryAction())
+        return arrayOf(
+          GenerateCommandAction(),
+          CreateTestAction(),
+          UpdateTestAction(),
+          GetListTestAction(),
+          GenerateRepositoryAction())
     }
 }

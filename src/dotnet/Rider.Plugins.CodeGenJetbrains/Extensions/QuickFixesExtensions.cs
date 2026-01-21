@@ -33,7 +33,7 @@ public static class QuickFixesExtensions
         // Нам нужен ЛЮБОЙ reference, чтобы просто создать инстанс ImportTypeFix.
         // Scoped-механизм все равно пересканирует файл заново.
         IReference seedRef = psiFile
-            .Descendants<IReferenceExpression>()
+            .Descendants<IReferenceName>()
             .FirstOrDefault()
             .GetReferences()
             .FirstOrDefault();

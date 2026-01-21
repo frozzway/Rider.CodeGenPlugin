@@ -1,7 +1,7 @@
 ﻿using JetBrains.Application.Parts;
 using JetBrains.Application.UI.ActionsRevised.Menu;
 using JetBrains.ProjectModel;
-using Rider.Plugins.CodeGenJetbrains.Execution.TestsGeneration.Update;
+using Rider.Plugins.CodeGenJetbrains.Execution.Generation.TestsGeneration.Update;
 
 namespace Rider.Plugins.CodeGenJetbrains.Actions.TestsGeneration;
 
