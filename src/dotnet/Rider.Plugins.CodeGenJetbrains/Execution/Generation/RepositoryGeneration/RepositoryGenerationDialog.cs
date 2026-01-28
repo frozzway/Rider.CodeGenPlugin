@@ -146,14 +146,18 @@ public class RepositoryGenerationDialog(SolutionTypeElementsAccessor classesAcce
         _solution.Locks.ExecuteWithReadLock(() =>
         {
             var entity = _entityPicker.Value.Value;
-            _entityProperties = entity.GetAllSuperClasses()
+
+            var superClassProperties = entity.GetAllSuperClasses()
                 .Select(type => type.GetTypeElement())
                 .OfType<IClass>()
                 .Where(elem => !elem.IsObjectClass())
-                .SelectMany(elem => elem.Properties).Concat(entity.Properties)
-                .Where(prop => prop.GetAccessRights() == AccessRights.PUBLIC)
-                .Where(prop => !prop.IsStatic)
+                .SelectMany(elem => elem.Properties);
+
+            _entityProperties = entity.Properties
+                .Concat(superClassProperties)
+                .Where(prop => prop.GetAccessRights() == AccessRights.PUBLIC && !prop.IsStatic)
                 .Select(i => i.ShortName)
+                .MoveToFirst(i => i == "Id")
                 .ToArray();
         });
 
@@ -164,8 +168,22 @@ public class RepositoryGenerationDialog(SolutionTypeElementsAccessor classesAcce
             dropdownValues: columns,
             dropdownInitialValues: _entityProperties.Select(prop =>
                 columns.FirstOrDefault(col => col.Name == prop.ToSnakeCaseRegex()
+                                              || CustomDbColumnPropertyEquality(col.Name, prop)
                                               || string.Equals(col.Name, prop, StringComparison.OrdinalIgnoreCase)))
         );
+    }
+
+    private bool CustomDbColumnPropertyEquality(string columnName, string propertyName)
+    {
+        var rules = new Dictionary<string, string>
+        {
+            ["CreatedUserId"] = "c_user_id",
+            ["CreatedDate"] = "c_date",
+            ["UpdatedUserId"] = "h_user_id",
+            ["UpdatedDate"] = "h_date",
+        };
+
+        return rules.TryGetValue(propertyName, out var columnNameRule) && columnNameRule == columnName;
     }
 
     public RepositoryGenerationDto GetDto()
