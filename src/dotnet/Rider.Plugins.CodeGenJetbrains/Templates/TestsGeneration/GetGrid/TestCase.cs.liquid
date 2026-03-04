@@ -1,0 +1,54 @@
+using System.Net;
+using {{ Test.TestModel.Type.Namespace }};
+using {{ Test.Request.Type.Namespace }};
+using {{ Test.Entity.Type.Namespace }};
+
+namespace {{ Type.Namespace }};
+
+public class {{ Type.Name }} : {{ Test.TestModel.Type.Name }}
+{
+    const int Count = 100;
+    const int TargetCount = 10;
+    const int Page = 2;
+    const int PageSize = 5;
+
+    public {{ Type.Name }}()
+    {
+        var entities = CreateEntities(Count);
+        var targetEntities = CreateEntities(TargetCount, "targetName");
+        var allEntities = entities.Append(targetEntities).ToArray();
+
+        TestName = "{{ Name }}";
+        AuthContext = new AuthContext {};
+        DbInitData = new DbInitDataModel
+        {
+            {{ Test.Entity.PluralName }} = allEntities
+        };
+        Request = new SieveModel
+        {
+            Page = Page,
+            PageSize = PageSize,
+            Sorts = "name",
+            Filters = "name_=targetName"  // name startsWith "targetName"
+        };
+
+        Expected = new TestCaseExpectations
+        {
+            ResponseStatusCode = HttpStatusCode.OK,
+            Entities = targetEntities
+                .Select(i => i.ToGridResponse())
+                .OrderBy(i => i.Name)
+                .Skip((Page - 1) * PageSize)
+                .Take(PageSize)
+                .ToArray(),
+            TotalCount = TargetCount
+        };
+    }
+
+    private {{ Test.Entity.Type.Name }}[] CreateEntities(int count, string? prefixName = null)
+        => Fixture.Build<{{ Test.Entity.Type.Name }}>()
+            .With(i => i.Name, prefixName is not null ? $"{prefixName}_{Guid.NewGuid()}" : Guid.NewGuid().ToString())
+            .With(i => i.Created, true)
+            .CreateMany(count)
+            .ToArray();
+}

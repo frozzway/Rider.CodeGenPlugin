@@ -14,4 +14,6 @@ public static class ComponentsIdentity
     // misc. text boxes
     public const string FilesPrefix = nameof(FilesPrefix);
     public const string TestCaseName = nameof(TestCaseName);
+
+    public const string EntityInput = nameof(EntityInput);
 }

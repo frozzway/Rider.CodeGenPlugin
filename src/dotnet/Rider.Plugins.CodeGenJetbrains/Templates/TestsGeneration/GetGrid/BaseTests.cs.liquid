@@ -1,0 +1,50 @@
+namespace {{ Type.Namespace }};
+
+public class {{ Type.Name }}(DbFixture dbFixture, ITestOutputHelper output) : BaseTestFixture(dbFixture, output)
+{
+    [Theory]
+    [ClassData(typeof({{ Test.TestSuite.Type.Name }}))]
+    public async Task {{ TheoryName }}({{ Test.TestModel.Type.Name }} testCase)
+    {
+        {%- if RemoveMigrationEntities %}
+        await RemoveMigrationEntitiesAsync();
+        {%- endif %}
+        await using var db = await DbState.CreateAsync(ServiceScope, testCase.DbInitData);
+
+        Client.UseAuthContext(testCase.AuthContext);
+
+        // act
+        {%- if ActWithQueryParams %}
+        var response = await Client.GetAsync($"{{ Test.Request.Endpoint }}{testCase.Request.ToQueryString()}");
+        {%- else %}
+        var response = await Client.PostAsJsonAsync("{{ Test.Request.Endpoint }}", testCase.Request);
+        {%- endif %}
+
+        // assert
+        await response.ShouldHaveStatusCodeAsync(testCase.Expected.ResponseStatusCode);
+
+        if (!string.IsNullOrEmpty(testCase.Expected.ErrorMessage))
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            errorContent.Should().Contain(testCase.Expected.ErrorMessage);
+            return;
+        }
+
+        var content = await response.Content.ReadFromJsonAsync<{{ ResponseActTypeName }}>();
+        content.Should().NotBeNull();
+        content!.Items.Should().BeEquivalentTo(testCase.Expected.Entities, options => options
+            .ExcludingMissingMembers()
+        );
+
+        if (testCase.Expected.TotalCount.HasValue)
+            content.TotalCount.Should().Be(testCase.Expected.TotalCount.Value);
+    }
+    {%- if RemoveMigrationEntities %}
+
+    private async Task RemoveMigrationEntitiesAsync()
+    {
+        var unitOfWork = ServiceScope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        await unitOfWork.Connection.ExecuteAsync("DELETE FROM schema.table");
+    }
+    {%- endif %}
+}

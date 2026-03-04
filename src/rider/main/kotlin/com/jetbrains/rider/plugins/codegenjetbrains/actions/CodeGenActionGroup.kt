@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.CreateTestAction
 import com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.GetListTestAction
+import com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.GetGridTestAction
 import com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.UpdateTestAction
 
 class CodeGenActionGroup : DefaultActionGroup(
@@ -24,6 +25,7 @@ class CodeGenActionGroup : DefaultActionGroup(
           CreateTestAction(),
           UpdateTestAction(),
           GetListTestAction(),
+          GetGridTestAction(),
           GenerateRepositoryAction())
     }
 }
