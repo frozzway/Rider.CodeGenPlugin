@@ -19,6 +19,7 @@ public class CommandGenerationDialog : IDialogForm<CommandGenerationDto>
 
     private InputField<string> _commandNameInput;
     private BeCheckbox _createResultCheckbox;
+    private BeCheckbox _useLanguageExtCheckbox;
     private InputField<string> _returnTypeInput;
 
     public BeDialog GetDialog(
@@ -43,6 +44,8 @@ public class CommandGenerationDialog : IDialogForm<CommandGenerationDto>
         _commandNameInput = InputFieldFactory.CreateTextBox("Name", lifetime, DefaultName);
         _createResultCheckbox = BeControls.GetCheckBox("Create result type", Guid.NewGuid().ToString(),
             lifetime, initialValue: false);
+        _useLanguageExtCheckbox = BeControls.GetCheckBox("Use LanguageExt Result", Guid.NewGuid().ToString(),
+            lifetime, initialValue: true);
         _returnTypeInput = InputFieldFactory.CreateTextBox("Return type", lifetime,
             configure: box => box.WithTypeCompletionShort(solution, lifetime, CSharpLanguage.Instance!, allTypes: true));
 
@@ -52,7 +55,7 @@ public class CommandGenerationDialog : IDialogForm<CommandGenerationDto>
             .AddInputField(_commandNameInput)
             .AddInputField(_returnTypeInput);
 
-        grid.AddElements(form.Grid, _createResultCheckbox);
+        grid.AddElements(form.Grid, _createResultCheckbox, _useLanguageExtCheckbox);
 
         return grid.InDialog(
             title: title,
@@ -67,7 +70,8 @@ public class CommandGenerationDialog : IDialogForm<CommandGenerationDto>
             Name = ((BeTextBox)_commandNameInput.InputControl).TryGetText().DefaultIfEmpty(DefaultName),
             ReturnType = _createResultCheckbox.Property.Value is true
                 ? null
-                : _returnTypeInput.CurrentValue.Value
+                : _returnTypeInput.CurrentValue.Value,
+            UseLanguageExt = _useLanguageExtCheckbox.Property.Value is true
         };
     }
 }

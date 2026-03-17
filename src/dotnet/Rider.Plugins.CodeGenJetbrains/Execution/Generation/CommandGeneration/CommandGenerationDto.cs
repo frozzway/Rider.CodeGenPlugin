@@ -4,4 +4,5 @@ public class CommandGenerationDto
 {
     public required string Name { get; set; }
     public string? ReturnType { get; set; }
+    public bool UseLanguageExt { get; set; }
 }

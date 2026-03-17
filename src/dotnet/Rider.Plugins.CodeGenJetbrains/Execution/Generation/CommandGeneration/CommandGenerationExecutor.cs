@@ -76,7 +76,8 @@ public class CommandGenerationExecutor : IExecutor<CommandGenerationDto>
                     Namespace = expectedNamespace
                 }
             },
-            ReturnType = dto.ReturnType ?? $"{commandShortName}Result"
+            ReturnType = dto.ReturnType ?? $"{commandShortName}Result",
+            UseLanguageExt = dto.UseLanguageExt
         };
         model.Command.Base = model;
         model.Handler.Base = model;

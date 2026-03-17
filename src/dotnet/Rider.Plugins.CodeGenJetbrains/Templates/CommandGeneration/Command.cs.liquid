@@ -1,5 +1,12 @@
+{% if Base.UseLanguageExt -%}
 using LanguageExt.Common;
 
+{% endif -%}
 namespace {{ Type.Namespace }};
 
+
+{% if Base.UseLanguageExt -%}
 public record {{ Type.Name }} : IRequest<Result<{{ Base.ReturnType }}>>;
+{% else -%}
+public record {{ Type.Name }} : IRequest<{{ Base.ReturnType }}>;
+{% endif -%}
