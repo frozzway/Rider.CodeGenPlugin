@@ -23,7 +23,7 @@ namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.TestsGeneration.Ge
 public class GetGridDialog(SolutionTypeElementsAccessor solutionTypeElementsAccessor) : IDialogForm<GetGridTestDto>
 {
     private string _defaultFilePrefix;
-    private const string DefaultCaseName = "Успешное получение табличных данных сущности с фильтрацией по организации и пагинацией";
+    private const string DefaultCaseName = "Успешное получение табличных данных сущности с фильтрацией и пагинацией";
     private const string DefaultEndpoint = "/api/endpoint/";
     private const string DefaultResponseType = "PagedResponse<>";
 

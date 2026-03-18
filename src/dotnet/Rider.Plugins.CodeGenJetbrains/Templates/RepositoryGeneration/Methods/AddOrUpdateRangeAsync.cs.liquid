@@ -1,6 +1,6 @@
 public async Task AddOrUpdateRangeAsync(
     IEnumerable<{{ Entity.Name }}> entities,
-    CancellationToken cancellationToken)
+    CancellationToken ct)
 {
     var items = entities
         .Where(i => i.Created || i.Updated)
@@ -47,7 +47,7 @@ public async Task AddOrUpdateRangeAsync(
         sql,
         parameters,
         transaction: _unitOfWork.Transaction,
-        cancellationToken: cancellationToken);
+        cancellationToken: ct);
 
     await _unitOfWork.Connection.ExecuteAsync(definition);
 }

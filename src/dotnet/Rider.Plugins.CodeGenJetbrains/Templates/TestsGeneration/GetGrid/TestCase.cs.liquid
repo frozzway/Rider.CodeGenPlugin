@@ -46,9 +46,10 @@ public class {{ Type.Name }} : {{ Test.TestModel.Type.Name }}
     }
 
     private {{ Test.Entity.Type.Name }}[] CreateEntities(int count, string? prefixName = null)
-        => Fixture.Build<{{ Test.Entity.Type.Name }}>()
-            .With(i => i.Name, prefixName is not null ? $"{prefixName}_{Guid.NewGuid()}" : Guid.NewGuid().ToString())
-            .With(i => i.Created, true)
-            .CreateMany(count)
+        => Enumerable.Range(0, count)
+            .Select(_ => Fixture.Build<{{ Test.Entity.Type.Name }}>()
+                .With(i => i.Name, prefixName is not null ? $"{prefixName}_{Guid.NewGuid()}" : Guid.NewGuid().ToString())
+                .With(i => i.Created, true)
+                .Create())
             .ToArray();
 }

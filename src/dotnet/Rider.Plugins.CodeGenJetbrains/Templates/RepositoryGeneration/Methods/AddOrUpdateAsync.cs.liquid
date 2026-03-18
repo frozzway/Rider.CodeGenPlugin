@@ -1,6 +1,6 @@
 public async Task<Guid> AddOrUpdateAsync(
     {{Entity.Name}} entity,
-    CancellationToken cancellationToken)
+    CancellationToken ct)
 {
     if(!(entity.Updated || entity.Created))
         return entity.Id;
@@ -31,7 +31,7 @@ public async Task<Guid> AddOrUpdateAsync(
         sql,
         entity,
         transaction: _unitOfWork.Transaction,
-        cancellationToken: cancellationToken);
+        cancellationToken: ct);
 
     return await _unitOfWork.Connection.ExecuteScalarAsync<Guid>(cd);
 }

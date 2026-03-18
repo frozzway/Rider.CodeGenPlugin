@@ -43,8 +43,7 @@ public class {{ Type.Name }}(DbFixture dbFixture, ITestOutputHelper output) : Ba
 
     private async Task RemoveMigrationEntitiesAsync()
     {
-        var unitOfWork = ServiceScope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        await unitOfWork.Connection.ExecuteAsync("DELETE FROM schema.table");
+        await UnitOfWork.Connection.ExecuteAsync("DELETE FROM schema.table");
     }
     {%- endif %}
 }

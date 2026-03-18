@@ -7,7 +7,7 @@ namespace {{ Type.Namespace }};
 {% if Base.UseLanguageExt -%}
 public class {{ Type.Name }}() : IRequestHandler<{{ Base.Command.Type.Name }}, Result<{{ Base.ReturnType }}>>
 {
-    public async Task<Result<{{ Base.ReturnType }}>> Handle({{ Base.Command.Type.Name }} request, CancellationToken cancellationToken)
+    public async Task<Result<{{ Base.ReturnType }}>> Handle({{ Base.Command.Type.Name }} request, CancellationToken ct)
     {
         throw new NotImplementedException();
     }
@@ -15,7 +15,7 @@ public class {{ Type.Name }}() : IRequestHandler<{{ Base.Command.Type.Name }}, R
 {% else -%}
 public class {{ Type.Name }}() : IRequestHandler<{{ Base.Command.Type.Name }}, {{ Base.ReturnType }}>
 {
-    public async Task<{{ Base.ReturnType }}> Handle({{ Base.Command.Type.Name }} request, CancellationToken cancellationToken)
+    public async Task<{{ Base.ReturnType }}> Handle({{ Base.Command.Type.Name }} request, CancellationToken ct)
     {
         throw new NotImplementedException();
     }
