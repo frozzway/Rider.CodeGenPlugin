@@ -1,6 +1,8 @@
 using System.Net;
 using {{ Test.TestModel.Type.Namespace }};
+{%- if Test.Request.Type %}
 using {{ Test.Request.Type.Namespace }};
+{%- endif %}
 using {{ Test.Entity.Type.Namespace }};
 
 namespace {{ Type.Namespace }};
@@ -19,17 +21,18 @@ public class {{ Type.Name }} : {{ Test.TestModel.Type.Name }}
         {
             {{ Test.Entity.PluralName }} = entities
         };
+        {%- if Test.Request.Type %}
         Request = Fixture
             .Build<{{ Test.Request.Type.Name }}>()
             .With(i => i.Limit, Count)
             .With(i => i.Offset, 0)
             .Create();
+        {%- endif %}
 
         Expected = new TestCaseExpectations
         {
             ResponseStatusCode = HttpStatusCode.OK,
-            Entities = entities.ToArray(),
-            TotalCount = Count
+            Entities = entities.Select(i => i.ToResponse()).ToList()
         };
     }
 

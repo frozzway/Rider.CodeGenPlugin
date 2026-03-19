@@ -1,10 +1,9 @@
 ﻿using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Abstract;
 
-namespace Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models.GetList;
+namespace Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models.GetMany;
 
-public class FGetListBaseTests : FBaseTests
+public class FGetManyBaseTests : FBaseTests
 {
     public string? ResponseActTypeName { get; set; }
-    public bool ActWithQueryParams { get; set; }
     public bool RemoveMigrationEntities { get; set; }
 }

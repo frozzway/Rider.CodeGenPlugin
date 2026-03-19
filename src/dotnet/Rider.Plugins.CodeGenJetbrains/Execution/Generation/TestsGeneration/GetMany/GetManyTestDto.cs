@@ -1,13 +1,12 @@
 ﻿using JetBrains.ReSharper.Psi;
 
-namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.TestsGeneration.GetList;
+namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.TestsGeneration.GetMany;
 
-public record GetListTestDto(
+public record GetManyTestDto(
     string FilesPrefix,
     string CaseName,
     string RequestEndpoint,
     bool RemoveMigrationEntities,
-    bool ActWithQueryParams,
     string ResponseActTypeName,
     IClass? RequestType,
     IClass? Entity);

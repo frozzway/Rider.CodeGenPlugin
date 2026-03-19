@@ -2,6 +2,6 @@
 
 import com.jetbrains.rider.actions.base.RiderAnAction
 
-class GetListTestAction : RiderAnAction(
-    backendActionId = "GetListTestActionId"
+class GetManyTestAction : RiderAnAction(
+    backendActionId = "GetManyTestActionId"
 )

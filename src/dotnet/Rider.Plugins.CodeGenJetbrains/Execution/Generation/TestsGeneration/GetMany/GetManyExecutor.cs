@@ -3,43 +3,42 @@ using JetBrains.ProjectModel;
 using Rider.Plugins.CodeGenJetbrains.Extensions;
 using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Abstract;
 using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models;
-using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models.GetList;
+using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models.GetMany;
 
-namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.TestsGeneration.GetList;
+namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.TestsGeneration.GetMany;
 
-public class GetListExecutor : BaseExecutor<GetListTestDto>
+public class GetManyExecutor : BaseExecutor<GetManyTestDto>
 {
-    protected override string TestModelTemplate => "TestsGeneration.GetList.TestModel.cs.liquid";
-    protected override string TestCaseTemplate => "TestsGeneration.GetList.TestCase.cs.liquid";
-    protected override string BaseTestTemplate => "TestsGeneration.GetList.BaseTests.cs.liquid";
-    protected override string SubFolderName => "GetList";
+    protected override string TestModelTemplate => "TestsGeneration.GetMany.TestModel.cs.liquid";
+    protected override string TestCaseTemplate => "TestsGeneration.GetMany.TestCase.cs.liquid";
+    protected override string BaseTestTemplate => "TestsGeneration.GetMany.BaseTests.cs.liquid";
+    protected override string SubFolderName => "GetMany";
 
-    protected override FTest ToFModel(GetListTestDto dto, IProjectFolder targetFolder, IProjectFolder testCasesFolder)
+    protected override FTest ToFModel(GetManyTestDto dto, IProjectFolder targetFolder, IProjectFolder testCasesFolder)
     {
         var folderNamespace = targetFolder.GetExpectedNamespace();
 
-        var fModel = new FGetListTest
+        var fModel = new FGetManyTest
         {
             Request = new FTestRequest
             {
                 Type = dto.RequestType.ToFType(),
                 Endpoint = dto.RequestEndpoint
             },
-            TestCase = new FGetListTestCase
+            TestCase = new FGetManyTestCase
             {
                 Name = dto.CaseName,
                 Type = GetFType(testCasesFolder.GetExpectedNamespace(), dto.FilesPrefix, "_Success")
             },
-            BaseTests = new FGetListBaseTests
+            BaseTests = new FGetManyBaseTests
             {
                 TheoryName = dto.FilesPrefix,
                 Type = GetFType(folderNamespace, dto.FilesPrefix, "Tests"),
-                ActWithQueryParams = dto.ActWithQueryParams,
                 RemoveMigrationEntities = dto.RemoveMigrationEntities,
                 ResponseActTypeName = dto.ResponseActTypeName
             },
-            TestModel = new FGetListTestModel { Type = GetFType(folderNamespace, dto.FilesPrefix, "TestModel") },
-            TestSuite = new FGetListTestSuite { Type = GetFType(folderNamespace, dto.FilesPrefix, "TestSuite") },
+            TestModel = new FGetManyTestModel { Type = GetFType(folderNamespace, dto.FilesPrefix, "TestModel") },
+            TestSuite = new FGetManyTestSuite { Type = GetFType(folderNamespace, dto.FilesPrefix, "TestSuite") },
             Entity = new FTestEntity
             {
                 Type = dto.Entity.ToFType(),

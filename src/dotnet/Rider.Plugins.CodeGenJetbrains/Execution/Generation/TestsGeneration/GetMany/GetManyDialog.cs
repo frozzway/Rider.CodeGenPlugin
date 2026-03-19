@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Humanizer;
 using JetBrains.Application.DataContext;
 using JetBrains.Application.Threading;
 using JetBrains.IDE.UI;
@@ -18,9 +17,9 @@ using Rider.Plugins.CodeGenJetbrains.Execution.Common;
 using Rider.Plugins.CodeGenJetbrains.Extensions;
 using Rider.Plugins.CodeGenJetbrains.UI.Components;
 
-namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.TestsGeneration.GetList;
+namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.TestsGeneration.GetMany;
 
-public class GetListDialog(SolutionTypeElementsAccessor solutionTypeElementsAccessor) : IDialogForm<GetListTestDto>
+public class GetManyDialog(SolutionTypeElementsAccessor solutionTypeElementsAccessor) : IDialogForm<GetManyTestDto>
 {
     private string _defaultFilePrefix;
     private const string DefaultCaseName = "Успешное получение списка сущности";
@@ -31,7 +30,6 @@ public class GetListDialog(SolutionTypeElementsAccessor solutionTypeElementsAcce
     private SearchableClassPicker _entityTypePicker;
     private InputFieldsForm _mainForm;
     private BeCheckbox _removeMigrationEntitiesCheckbox;
-    private BeCheckbox _actWithQueryParamCheckbox;
 
     public BeDialog GetDialog(Lifetime lifetime, IDataContext context, string title)
     {
@@ -53,15 +51,12 @@ public class GetListDialog(SolutionTypeElementsAccessor solutionTypeElementsAcce
 
         var folderName = folder.Name;
         var solution = folder.GetSolution();
-        _defaultFilePrefix = $"Get{folderName.Singularize()}List";
+        _defaultFilePrefix = $"Get{folderName}";
         _requestTypePicker = new SearchableClassPicker(lifetime, dialogHost, solutionTypeElementsAccessor.Classes);
         _entityTypePicker = new SearchableClassPicker(lifetime, dialogHost, solutionTypeElementsAccessor.Classes);
         _removeMigrationEntitiesCheckbox = BeControls.GetCheckBox(
             "Remove migration entities", Guid.NewGuid().ToString(),
             lifetime, initialValue: false);
-        _actWithQueryParamCheckbox = BeControls.GetCheckBox(
-            "Use query params", Guid.NewGuid().ToString(),
-            lifetime, initialValue: true);
 
         var grid = BeControls.GetAutoGrid();
 
@@ -82,7 +77,7 @@ public class GetListDialog(SolutionTypeElementsAccessor solutionTypeElementsAcce
             .AddInputField(requestTypeInput, "request-type")
             .AddInputField(responseTypeName, "response-type");
 
-        grid.AddElements(_mainForm.Grid, _actWithQueryParamCheckbox, _removeMigrationEntitiesCheckbox);
+        grid.AddElements(_mainForm.Grid, _removeMigrationEntitiesCheckbox);
 
         ((BeTextBox)requestEndpointInput.InputControl).Text.Change.Advise(lifetime, newUrl =>
         {
@@ -115,19 +110,18 @@ public class GetListDialog(SolutionTypeElementsAccessor solutionTypeElementsAcce
     private static Func<IHttpEndpoint, bool> FilterByHttpVerb(params string[] httpVerbs)
         => endpoint => httpVerbs.Any(httpVerb => endpoint.Verb.ToString() == httpVerb);
 
-    public GetListTestDto GetDto()
+    public GetManyTestDto GetDto()
     {
         var filePrefixTextBox = (BeTextBox)_mainForm.GetInputField("files-prefix")!.InputControl;
         var testCaseTextBox = (BeTextBox)_mainForm.GetInputField("testcase-name")!.InputControl;
         var requestEndpointTextBox = (BeTextBox)_mainForm.GetInputField("request-endpoint")!.InputControl;
         var responseTypeTextBox = (BeTextBox)_mainForm.GetInputField("response-type")!.InputControl;
 
-        return new GetListTestDto(
+        return new GetManyTestDto(
             FilesPrefix: filePrefixTextBox.TryGetText().DefaultIfEmpty(_defaultFilePrefix),
             CaseName: testCaseTextBox.TryGetText().DefaultIfEmpty(DefaultCaseName),
             RequestEndpoint: requestEndpointTextBox.TryGetText().DefaultIfEmpty(DefaultEndpoint),
             RemoveMigrationEntities: _removeMigrationEntitiesCheckbox.Property.Value!.Value,
-            ActWithQueryParams: _actWithQueryParamCheckbox.Property.Value!.Value,
             ResponseActTypeName: responseTypeTextBox.TryGetText().DefaultIfEmpty(DefaultResponseType),
             RequestType: _requestTypePicker.Value.GetValue(),
             Entity: _entityTypePicker.Value.GetValue());

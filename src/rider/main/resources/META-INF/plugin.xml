@@ -1,7 +1,7 @@
 <idea-plugin require-restart="true">
     <id>com.jetbrains.rider.plugins.codegenjetbrains</id>
     <name>RiderCodeGen</name>
-    <version>1.4.2</version>
+    <version>1.5.0</version>
     <vendor url="https://github.com/frozzway">Aleksandr Okunev</vendor>
     <depends>com.intellij.modules.rider</depends>
     <depends>com.intellij.database</depends>
@@ -20,7 +20,7 @@
             <action id="generate-command-action-id" class="com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.GenerateCommandAction" />
             <action id="create-test-action-id" class="com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.CreateTestAction" />
             <action id="update-test-action-id" class="com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.UpdateTestAction" />
-            <action id="get-list-test-action-id" class="com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.GetListTestAction" />
+            <action id="get-many-test-action-id" class="com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.GetManyTestAction" />
             <action id="get-grid-test-action-id" class="com.jetbrains.rider.plugins.codegenjetbrains.actions.testsgeneration.GetGridTestAction" />
             <action id="generate-repository-action-id" class="com.jetbrains.rider.plugins.codegenjetbrains.actions.GenerateRepositoryAction" />
         </group>

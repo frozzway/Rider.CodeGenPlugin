@@ -14,10 +14,10 @@ public class {{ Type.Name }}(DbFixture dbFixture, ITestOutputHelper output) : Ba
         Client.UseAuthContext(testCase.AuthContext);
 
         // act
-        {%- if ActWithQueryParams %}
+        {%- if Test.Request.Type %}
         var response = await Client.GetAsync($"{{ Test.Request.Endpoint }}{testCase.Request.ToQueryString()}");
         {%- else %}
-        var response = await Client.PostAsJsonAsync("{{ Test.Request.Endpoint }}", testCase.Request);
+        var response = await Client.GetAsync("{{ Test.Request.Endpoint }}");
         {%- endif %}
 
         // assert
@@ -32,12 +32,9 @@ public class {{ Type.Name }}(DbFixture dbFixture, ITestOutputHelper output) : Ba
 
         var content = await response.Content.ReadFromJsonAsync<{{ ResponseActTypeName }}>();
         content.Should().NotBeNull();
-        content!.Items.Should().BeEquivalentTo(testCase.Expected.Entities, options => options
+        content.Should().BeEquivalentTo(testCase.Expected.Entities, options => options
             .ExcludingMissingMembers()
         );
-
-        if (testCase.Expected.TotalCount.HasValue)
-            content.TotalCount.Should().Be(testCase.Expected.TotalCount.Value);
     }
     {%- if RemoveMigrationEntities %}
 

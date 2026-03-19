@@ -1,19 +1,22 @@
 using System.Net;
+{%- if Test.Request.Type %}
 using {{ Test.Request.Type.Namespace }};
+{%- endif %}
 using {{ Test.Entity.Type.Namespace }};
 
 namespace {{ Type.Namespace }};
 
 public class {{ Type.Name }} : BaseTestModel
 {
+    {%- if Test.Request.Type %}
     public {{ Test.Request.Type.Name }} Request { get; set; }
+    {%- endif %}
     public TestCaseExpectations Expected { get; set; }
 
     public class TestCaseExpectations
     {
         public HttpStatusCode ResponseStatusCode { get; set; }
         public string? ErrorMessage { get; set; }
-        public int? TotalCount { get; set; }
-        public {{ Test.Entity.Type.Name }}[] Entities { get; set; }
+        public {{ Test.BaseTests.ResponseActTypeName }} Entities { get; set; }
     }
 }
