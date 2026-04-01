@@ -21,15 +21,15 @@ namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.TestsGeneration.Ge
 
 public class GetManyDialog(SolutionTypeElementsAccessor solutionTypeElementsAccessor) : IDialogForm<GetManyTestDto>
 {
-    private string _defaultFilePrefix;
     private const string DefaultCaseName = "Успешное получение списка сущности";
     private const string DefaultEndpoint = "/api/endpoint/";
     private const string DefaultResponseType = "PagedResponse<>";
+    private string _defaultFilePrefix = null!;
 
-    private SearchableClassPicker _requestTypePicker;
-    private SearchableClassPicker _entityTypePicker;
-    private InputFieldsForm _mainForm;
-    private BeCheckbox _removeMigrationEntitiesCheckbox;
+    private SearchableClassPicker _requestTypePicker = null!;
+    private SearchableClassPicker _entityTypePicker = null!;
+    private InputFieldsForm _mainForm = null!;
+    private BeCheckbox _removeMigrationEntitiesCheckbox = null!;
 
     public BeDialog GetDialog(Lifetime lifetime, IDataContext context, string title)
     {
@@ -70,30 +70,17 @@ public class GetManyDialog(SolutionTypeElementsAccessor solutionTypeElementsAcce
             configure: box => box.WithTypeCompletionShort(solution, lifetime, CSharpLanguage.Instance!));
 
         _mainForm = new InputFieldsForm(lifetime)
-            .AddInputField(filePrefixInput, "files-prefix")
-            .AddInputField(testCaseInput, "testcase-name")
-            .AddInputField(requestEndpointInput, "request-endpoint")
-            .AddInputField(entityInput, "entity-input")
-            .AddInputField(requestTypeInput, "request-type")
-            .AddInputField(responseTypeName, "response-type");
+            .AddInputField(filePrefixInput, ComponentsIdentity.FilesPrefix)
+            .AddInputField(testCaseInput, ComponentsIdentity.TestCaseName)
+            .AddInputField(requestEndpointInput, ComponentsIdentity.ActEndpoint)
+            .AddInputField(entityInput, ComponentsIdentity.EntityInput)
+            .AddInputField(requestTypeInput, ComponentsIdentity.RequestActType)
+            .AddInputField(responseTypeName, ComponentsIdentity.ResponseActType);
 
         grid.AddElements(_mainForm.Grid, _removeMigrationEntitiesCheckbox);
 
-        ((BeTextBox)requestEndpointInput.InputControl).Text.Change.Advise(lifetime, newUrl =>
-        {
-            var endpoint = solution.ResolveHttpEndpoint<AspNetHttpEndpoint>(newUrl, "GET");
-            if (endpoint is null) return;
-            solution.Locks.ExecuteWithReadLock(() =>
-            {
-                var responseType = endpoint.ActionMethod.ReturnType.GetUnwrappedType();
-                if (responseType is not null)
-                    responseTypeName.CurrentValue.SetValue(responseType.GetPresentableName(CSharpLanguage.Instance!));
-
-                var requestType = endpoint.ActionMethod.Parameters.FirstOrDefault()?.Type.GetUnwrappedType().GetTypeElement();
-                if (requestType is IClass typed)
-                    _requestTypePicker.Value.SetValue(typed);
-            });
-        });
+        ((BeTextBox)requestEndpointInput.InputControl).Text.Change.Advise(lifetime,
+            newUrl => UpdateDialogInputs(newUrl, solution));
 
         var wrapper = BeControls.GetScrollablePanel(
             content: grid,
@@ -107,15 +94,37 @@ public class GetManyDialog(SolutionTypeElementsAccessor solutionTypeElementsAcce
             isResizable: true);
     }
 
+    private void UpdateDialogInputs(string newUrl, ISolution solution)
+    {
+        var responseTypeName = _mainForm.GetInputField<string>(ComponentsIdentity.ResponseActType)!;
+        var endpoint = solution.ResolveHttpEndpoint<AspNetHttpEndpoint>(newUrl, "GET");
+        if (endpoint is null) return;
+        solution.Locks.ExecuteWithReadLock(() =>
+        {
+            var responseType = endpoint.ActionMethod.ReturnType.GetUnwrappedType();
+            if (responseType is not null)
+                responseTypeName.CurrentValue.SetValue(responseType.GetPresentableName(CSharpLanguage.Instance!));
+
+            var requestType = endpoint.ActionMethod.Parameters.FirstOrDefault()?.Type.GetUnwrappedType().GetTypeElement();
+            if (requestType is IClass typed)
+                _requestTypePicker.Value.SetValue(typed);
+
+            var entity = endpoint.FindEntityUsingControllerName(solutionTypeElementsAccessor.Classes);
+
+            if (entity is not null)
+                _entityTypePicker.Value.SetValue(entity);
+        });
+    }
+
     private static Func<IHttpEndpoint, bool> FilterByHttpVerb(params string[] httpVerbs)
         => endpoint => httpVerbs.Any(httpVerb => endpoint.Verb.ToString() == httpVerb);
 
     public GetManyTestDto GetDto()
     {
-        var filePrefixTextBox = (BeTextBox)_mainForm.GetInputField("files-prefix")!.InputControl;
-        var testCaseTextBox = (BeTextBox)_mainForm.GetInputField("testcase-name")!.InputControl;
-        var requestEndpointTextBox = (BeTextBox)_mainForm.GetInputField("request-endpoint")!.InputControl;
-        var responseTypeTextBox = (BeTextBox)_mainForm.GetInputField("response-type")!.InputControl;
+        var filePrefixTextBox = (BeTextBox)_mainForm.GetInputField(ComponentsIdentity.FilesPrefix)!.InputControl;
+        var testCaseTextBox = (BeTextBox)_mainForm.GetInputField(ComponentsIdentity.TestCaseName)!.InputControl;
+        var requestEndpointTextBox = (BeTextBox)_mainForm.GetInputField(ComponentsIdentity.ActEndpoint)!.InputControl;
+        var responseTypeTextBox = (BeTextBox)_mainForm.GetInputField(ComponentsIdentity.ResponseActType)!.InputControl;
 
         return new GetManyTestDto(
             FilesPrefix: filePrefixTextBox.TryGetText().DefaultIfEmpty(_defaultFilePrefix),

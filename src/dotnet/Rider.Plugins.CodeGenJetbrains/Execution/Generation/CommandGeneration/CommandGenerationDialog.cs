@@ -17,10 +17,10 @@ public class CommandGenerationDialog : IDialogForm<CommandGenerationDto>
 {
     private const string DefaultName = "CreateEntityCommand";
 
-    private InputField<string> _commandNameInput;
-    private BeCheckbox _createResultCheckbox;
-    private BeCheckbox _useLanguageExtCheckbox;
-    private InputField<string> _returnTypeInput;
+    private InputField<string> _commandNameInput = null!;
+    private BeCheckbox _createResultCheckbox = null!;
+    private BeCheckbox _useLanguageExtCheckbox = null!;
+    private InputField<string> _returnTypeInput = null!;
 
     public BeDialog GetDialog(
         Lifetime lifetime,

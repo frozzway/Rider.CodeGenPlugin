@@ -16,7 +16,7 @@ public class InputFieldsForm
     private readonly Dictionary<string, InputField> _inputFields = new();
     public BeSpanGrid Grid { get; }
 
-    public IViewableProperty<bool> Enabled = new ViewableProperty<bool>(true);
+    public readonly IViewableProperty<bool> Enabled = new ViewableProperty<bool>(true);
 
     /// <param name="lifetime">Lifetime компонента</param>
     /// <param name="labelWidth">Ширина колонки с labels в пикселях (или auto, если 0)</param>
@@ -60,5 +60,15 @@ public class InputFieldsForm
     public InputField? GetInputField(string id)
     {
         return _inputFields.TryGetValue(id, out var textBox) ? textBox : null;
+    }
+
+    /// <summary>
+    /// Получает InputField по его идентификатору.
+    /// </summary>
+    /// <param name="id">Идентификатор InputField, указанный при добавлении</param>
+    /// <returns>InputField или null, если InputField с таким ID не найден</returns>
+    public InputField<T>? GetInputField<T>(string id) where T : notnull
+    {
+        return _inputFields.TryGetValue(id, out var textBox) ? (InputField<T>)textBox : null;
     }
 }

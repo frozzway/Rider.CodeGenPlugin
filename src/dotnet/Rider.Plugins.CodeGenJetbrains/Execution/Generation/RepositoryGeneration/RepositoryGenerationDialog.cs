@@ -32,13 +32,13 @@ public class RepositoryGenerationDialog(SolutionTypeElementsAccessor classesAcce
         RepositoryMethods.GetManyAsync
     ];
 
-    private DataSourceInput _dataSourceInput;
-    private ISolution _solution;
-    private SearchableClassPicker _entityPicker;
-    private SearchableClassPicker _entityListPicker;
-    private DropdownListWithCheckbox<DbColumnDto> _columnList;
-    private ListWithCheckbox<string> _methodList;
-    private string[] _entityProperties;
+    private DataSourceInput _dataSourceInput = null!;
+    private ISolution _solution = null!;
+    private SearchableClassPicker _entityPicker = null!;
+    private SearchableClassPicker _entityListPicker = null!;
+    private DropdownListWithCheckbox<DbColumnDto> _columnList = null!;
+    private ListWithCheckbox<string> _methodList = null!;
+    private string[] _entityProperties = null!;
 
     public BeDialog GetDialog(
         Lifetime lifetime,

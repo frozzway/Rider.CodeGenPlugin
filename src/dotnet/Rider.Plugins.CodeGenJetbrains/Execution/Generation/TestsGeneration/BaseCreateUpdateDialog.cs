@@ -29,12 +29,12 @@ public abstract class BaseCreateUpdateDialog<T>(SolutionTypeElementsAccessor sol
     protected abstract string Verb { get; }
     protected abstract string ActHttpVerb { get; }
 
-    protected string _defaultFilePrefix;
+    protected string DefaultFilePrefix = null!;
     protected const string DefaultEndpoint = "/api/endpoint/";
 
-    protected InputFieldsForm _mainForm;
-    protected InputFieldsForm _assertForm;
-    protected readonly Dictionary<string, SearchableClassPicker> _searchableClassPickers = new();
+    protected InputFieldsForm MainForm = null!;
+    protected InputFieldsForm AssertForm = null!;
+    protected readonly Dictionary<string, SearchableClassPicker> SearchableClassPickers = new();
 
     public BeDialog GetDialog(
         Lifetime lifetime,
@@ -60,31 +60,31 @@ public abstract class BaseCreateUpdateDialog<T>(SolutionTypeElementsAccessor sol
         var dialogHost = context.GetComponent<IDialogHost>();
         var folderName = folder.Name;
         var solution = folder.GetSolution();
-        _defaultFilePrefix = $"{Verb}{folderName.Singularize()}";
+        DefaultFilePrefix = $"{Verb}{folderName.Singularize()}";
 
         var requestActTypePicker = new SearchableClassPicker(lifetime, dialogHost, solutionTypeElementsAccessor.Classes);
         var responseActTypePicker = new SearchableClassPicker(lifetime, dialogHost, solutionTypeElementsAccessor.Classes);
         var responseAssertTypePicker = new SearchableClassPicker(lifetime, dialogHost, solutionTypeElementsAccessor.Classes);
-        _searchableClassPickers.Add(ComponentsIdentity.RequestActType, requestActTypePicker);
-        _searchableClassPickers.Add(ComponentsIdentity.ResponseActType, responseActTypePicker);
-        _searchableClassPickers.Add(ComponentsIdentity.ResponseAssertType, responseAssertTypePicker);
+        SearchableClassPickers.Add(ComponentsIdentity.RequestActType, requestActTypePicker);
+        SearchableClassPickers.Add(ComponentsIdentity.ResponseActType, responseActTypePicker);
+        SearchableClassPickers.Add(ComponentsIdentity.ResponseAssertType, responseAssertTypePicker);
 
         var grid = BeControls.GetAutoGrid();
 
-        var filePrefixInput = InputFieldFactory.CreateTextBox("File names prefix:", lifetime, placeholder: _defaultFilePrefix);
+        var filePrefixInput = InputFieldFactory.CreateTextBox("File names prefix:", lifetime, placeholder: DefaultFilePrefix);
         var testCaseInput = InputFieldFactory.CreateTextBox("Test case name:", lifetime, placeholder: DefaultCaseName);
         var actEndpointInput = InputFieldFactory.CreateTextBox("Act endpoint:", lifetime, placeholder: DefaultEndpoint,
             configure: box => box.WithEndpointsCompletion(solution, lifetime, FilterByHttpVerb(ActHttpVerb)));
 
         var requestActTypeInput = new InputField(lifetime, "Request type:", requestActTypePicker.Control);
 
-        _mainForm = new InputFieldsForm(lifetime)
+        MainForm = new InputFieldsForm(lifetime)
             .AddInputField(filePrefixInput, ComponentsIdentity.FilesPrefix)
             .AddInputField(testCaseInput, ComponentsIdentity.TestCaseName)
             .AddInputField(actEndpointInput, ComponentsIdentity.ActEndpoint)
             .AddInputField(requestActTypeInput, ComponentsIdentity.RequestActType);
 
-        grid.AddElement(_mainForm.Grid.WithTitledBorder("Parameters"));
+        grid.AddElement(MainForm.Grid.WithTitledBorder("Parameters"));
 
         var assertEndpointInput = InputFieldFactory.CreateTextBox("Assert endpoint:", lifetime, placeholder: DefaultEndpoint,
             configure: box => box.WithEndpointsCompletion(solution, lifetime, FilterByHttpVerb("GET")));
@@ -92,8 +92,8 @@ public abstract class BaseCreateUpdateDialog<T>(SolutionTypeElementsAccessor sol
         var responseActTypeInput = new InputField(lifetime, "Response act type:", responseActTypePicker.Control);
         var responseAssertTypeInput = new InputField(lifetime, "Response assert type:", responseAssertTypePicker.Control);
 
-        _assertForm = InitializeAssertForm(lifetime, assertEndpointInput, responseActTypeInput, responseAssertTypeInput);
-        _assertForm.Enabled.Value = false;
+        AssertForm = InitializeAssertForm(lifetime, assertEndpointInput, responseActTypeInput, responseAssertTypeInput);
+        AssertForm.Enabled.Value = false;
 
         var actEndpointTextBox = (BeTextBox)actEndpointInput.InputControl;
         var assertEndpointTextBox = (BeTextBox)assertEndpointInput.InputControl;
@@ -104,10 +104,10 @@ public abstract class BaseCreateUpdateDialog<T>(SolutionTypeElementsAccessor sol
 
         // Assert stage group
         var assertCheckbox = BeControls.GetCheckBox("Enable", Guid.NewGuid().ToString(), lifetime)!;
-        assertCheckbox.Property.AdviseNotNull(lifetime, newValue => _assertForm.Enabled.Value = newValue);
+        assertCheckbox.Property.AdviseNotNull(lifetime, newValue => AssertForm.Enabled.Value = newValue);
 
         var assertGrid = BeControls.GetAutoGrid();
-        assertGrid.AddElements(assertCheckbox.WithMargin(PluginBeControls.GetMargin(top: 5)), _assertForm.Grid);
+        assertGrid.AddElements(assertCheckbox.WithMargin(PluginBeControls.GetMargin(top: 5)), AssertForm.Grid);
 
         grid.AddElement(assertGrid.WithTitledBorder("Assert stage", bottomMargin: 10));
 

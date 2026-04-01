@@ -42,23 +42,23 @@ public class UpdateDialog(SolutionTypeElementsAccessor accessor)
 
     public override UpdateTestDto GetDto()
     {
-        var filePrefixTextBox = (BeTextBox)_mainForm.GetInputField(ComponentsIdentity.FilesPrefix)!.InputControl;
-        var testCaseTextBox = (BeTextBox)_mainForm.GetInputField(ComponentsIdentity.TestCaseName)!.InputControl;
-        var assertEndpointTextBox = (BeTextBox)_assertForm.GetInputField(ComponentsIdentity.AssertEndpoint)!.InputControl;
-        var actEndpointTextBox = (BeTextBox)_mainForm.GetInputField(ComponentsIdentity.ActEndpoint)!.InputControl;
+        var filePrefixTextBox = (BeTextBox)MainForm.GetInputField(ComponentsIdentity.FilesPrefix)!.InputControl;
+        var testCaseTextBox = (BeTextBox)MainForm.GetInputField(ComponentsIdentity.TestCaseName)!.InputControl;
+        var assertEndpointTextBox = (BeTextBox)AssertForm.GetInputField(ComponentsIdentity.AssertEndpoint)!.InputControl;
+        var actEndpointTextBox = (BeTextBox)MainForm.GetInputField(ComponentsIdentity.ActEndpoint)!.InputControl;
 
-        var assertRequestDto = _assertForm.Enabled.Value
+        var assertRequestDto = AssertForm.Enabled.Value
             ? new AssertRequestDto(
-                ResponseAssertType: _searchableClassPickers[ComponentsIdentity.ResponseAssertType].Value.GetValue(),
+                ResponseAssertType: SearchableClassPickers[ComponentsIdentity.ResponseAssertType].Value.GetValue(),
                 RequestAssertEndpoint: assertEndpointTextBox.TryGetText().DefaultIfEmpty(DefaultEndpoint).RemoveLastPart()
             )
             : null;
 
         return new UpdateTestDto(
-            FilesPrefix: filePrefixTextBox.TryGetText().DefaultIfEmpty(_defaultFilePrefix),
+            FilesPrefix: filePrefixTextBox.TryGetText().DefaultIfEmpty(DefaultFilePrefix),
             CaseName: testCaseTextBox.TryGetText().DefaultIfEmpty(DefaultCaseName),
             RequestEndpoint: actEndpointTextBox.TryGetText().DefaultIfEmpty(DefaultEndpoint).RemoveLastPart(),
-            RequestType: _searchableClassPickers[ComponentsIdentity.RequestActType].Value.GetValue(),
+            RequestType: SearchableClassPickers[ComponentsIdentity.RequestActType].Value.GetValue(),
             AssertRequestInfo: assertRequestDto);
     }
 }

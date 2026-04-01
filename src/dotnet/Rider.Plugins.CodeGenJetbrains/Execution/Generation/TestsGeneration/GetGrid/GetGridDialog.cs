@@ -22,16 +22,16 @@ namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.TestsGeneration.Ge
 
 public class GetGridDialog(SolutionTypeElementsAccessor solutionTypeElementsAccessor) : IDialogForm<GetGridTestDto>
 {
-    private string _defaultFilePrefix;
     private const string DefaultCaseName = "Успешное получение табличных данных сущности с фильтрацией и пагинацией";
     private const string DefaultEndpoint = "/api/endpoint/";
     private const string DefaultResponseType = "PagedResponse<>";
+    private string _defaultFilePrefix = null!;
 
-    private SearchableClassPicker _requestTypePicker;
-    private SearchableClassPicker _entityTypePicker;
-    private InputFieldsForm _mainForm;
-    private BeCheckbox _removeMigrationEntitiesCheckbox;
-    private BeCheckbox _actWithQueryParamCheckbox;
+    private SearchableClassPicker _requestTypePicker = null!;
+    private SearchableClassPicker _entityTypePicker = null!;
+    private InputFieldsForm _mainForm = null!;
+    private BeCheckbox _removeMigrationEntitiesCheckbox = null!;
+    private BeCheckbox _actWithQueryParamCheckbox = null!;
     private string _unwrappedGridResponseModel = string.Empty;
 
     public BeDialog GetDialog(Lifetime lifetime, IDataContext context, string title)
@@ -85,25 +85,8 @@ public class GetGridDialog(SolutionTypeElementsAccessor solutionTypeElementsAcce
 
         grid.AddElements(_mainForm.Grid, _actWithQueryParamCheckbox, _removeMigrationEntitiesCheckbox);
 
-        ((BeTextBox)requestEndpointInput.InputControl).Text.Change.Advise(lifetime, newUrl =>
-        {
-            var endpoint = solution.ResolveHttpEndpoint<AspNetHttpEndpoint>(newUrl, "GET");
-            if (endpoint is null) return;
-            solution.Locks.ExecuteWithReadLock(() =>
-            {
-                var responseType = endpoint.ActionMethod.ReturnType.GetUnwrappedType();
-                if (responseType is not null)
-                {
-                    var presentableName = responseType.GetPresentableName(CSharpLanguage.Instance!);
-                    responseTypeName.CurrentValue.SetValue(presentableName);
-                    _unwrappedGridResponseModel = presentableName.GetInnerType();
-                }
-
-                var requestType = endpoint.ActionMethod.Parameters.FirstOrDefault()?.Type.GetUnwrappedType().GetTypeElement();
-                if (requestType is IClass typed)
-                    _requestTypePicker.Value.SetValue(typed);
-            });
-        });
+        ((BeTextBox)requestEndpointInput.InputControl).Text.Change.Advise(lifetime,
+            newUrl => UpdateDialogInputs(newUrl, solution));
 
         var wrapper = BeControls.GetScrollablePanel(
             content: grid,
@@ -115,6 +98,33 @@ public class GetGridDialog(SolutionTypeElementsAccessor solutionTypeElementsAcce
             title: title,
             id: Guid.NewGuid().ToString(),
             isResizable: true);
+    }
+
+    private void UpdateDialogInputs(string newUrl, ISolution solution)
+    {
+        var responseTypeNameInput = _mainForm.GetInputField<string>(ComponentsIdentity.ResponseActType)!;
+        var endpoint = solution.ResolveHttpEndpoint<AspNetHttpEndpoint>(newUrl, "GET");
+        if (endpoint is null) return;
+        solution.Locks.ExecuteWithReadLock(() =>
+        {
+            var responseType = endpoint.ActionMethod.ReturnType.GetUnwrappedType();
+            if (responseType is not null)
+            {
+                var presentableName = responseType.GetPresentableName(CSharpLanguage.Instance!);
+
+                responseTypeNameInput.CurrentValue.SetValue(presentableName);
+                _unwrappedGridResponseModel = presentableName.GetInnerType();
+            }
+
+            var requestType = endpoint.ActionMethod.Parameters.FirstOrDefault()?.Type.GetUnwrappedType().GetTypeElement();
+            if (requestType is IClass typed)
+                _requestTypePicker.Value.SetValue(typed);
+
+            var entity = endpoint.FindEntityUsingControllerName(solutionTypeElementsAccessor.Classes);
+
+            if (entity is not null)
+                _entityTypePicker.Value.SetValue(entity);
+        });
     }
 
     private static Func<IHttpEndpoint, bool> FilterByHttpVerb(params string[] httpVerbs)
