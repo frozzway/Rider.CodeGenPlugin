@@ -5,5 +5,6 @@ namespace Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models.Upda
 public class FUpdateTest : FTest
 {
     public FTestRequest Request { get; set; }
+    public FTestEntity Entity { get; set; }
     public FTestAssertRequest? AssertRequest { get; set; }
 }

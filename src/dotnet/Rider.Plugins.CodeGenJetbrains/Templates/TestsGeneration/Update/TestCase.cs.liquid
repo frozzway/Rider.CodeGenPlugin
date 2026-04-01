@@ -7,10 +7,15 @@ public class {{ Type.Name }} : {{ Test.TestModel.Type.Name }}
 {
     public {{ Type.Name }}()
     {
+        var entity = CreateEntity();
+
         TestName = "{{ Name }}";
         AuthContext = new AuthContext {};
-        DbInitData = new DbInitDataModel {};
-        EntityId = specify;
+        DbInitData = DbInitData = new DbInitDataModel
+        {
+            {{ Test.Entity.PluralName }} = [entity]
+        };
+        EntityId = entity.Id;
         Request = Fixture
             .Build<{{ Test.Request.Type.Name }}>()
             .Create();
@@ -20,4 +25,9 @@ public class {{ Type.Name }} : {{ Test.TestModel.Type.Name }}
             ResponseStatusCode = HttpStatusCode.NoContent,
         };
     }
+
+    private {{ Test.Entity.Type.Name }} CreateEntity()
+        => Fixture.Build<{{ Test.Entity.Type.Name }}>()
+            .With(i => i.Created, true)
+            .Create();
 }

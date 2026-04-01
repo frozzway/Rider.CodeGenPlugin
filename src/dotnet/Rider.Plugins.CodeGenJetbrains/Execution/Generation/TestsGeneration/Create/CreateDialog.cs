@@ -11,6 +11,7 @@ public class CreateDialog(SolutionTypeElementsAccessor accessor)
     protected override string DefaultCaseName => "Успешное добавление сущности";
     protected override string Verb => "Create";
     protected override string ActHttpVerb => "POST";
+    protected override bool EntityInputEnabled => false;
 
     public override CreateTestDto GetDto()
     {

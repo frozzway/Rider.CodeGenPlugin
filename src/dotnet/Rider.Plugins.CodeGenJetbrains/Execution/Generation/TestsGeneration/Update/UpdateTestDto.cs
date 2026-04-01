@@ -7,7 +7,8 @@ public record UpdateTestDto(
     string CaseName,
     string RequestEndpoint,
     IClass? RequestType,
-    AssertRequestDto? AssertRequestInfo);
+    AssertRequestDto? AssertRequestInfo,
+    IClass? Entity);
 
 public record AssertRequestDto(
     IClass? ResponseAssertType,

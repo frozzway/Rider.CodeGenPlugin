@@ -28,6 +28,7 @@ public abstract class BaseCreateUpdateDialog<T>(SolutionTypeElementsAccessor sol
     protected abstract string DefaultCaseName { get; }
     protected abstract string Verb { get; }
     protected abstract string ActHttpVerb { get; }
+    protected abstract bool EntityInputEnabled { get; }
 
     protected string DefaultFilePrefix = null!;
     protected const string DefaultEndpoint = "/api/endpoint/";
@@ -84,6 +85,14 @@ public abstract class BaseCreateUpdateDialog<T>(SolutionTypeElementsAccessor sol
             .AddInputField(actEndpointInput, ComponentsIdentity.ActEndpoint)
             .AddInputField(requestActTypeInput, ComponentsIdentity.RequestActType);
 
+        if (EntityInputEnabled)
+        {
+            var entityTypePicker = new SearchableClassPicker(lifetime, dialogHost, solutionTypeElementsAccessor.Classes);
+            SearchableClassPickers.Add(ComponentsIdentity.EntityInput, entityTypePicker);
+            var entityInput = new InputField(lifetime, "Entity", entityTypePicker.Control);
+            MainForm.AddInputField(entityInput, ComponentsIdentity.EntityInput);
+        }
+
         grid.AddElement(MainForm.Grid.WithTitledBorder("Parameters"));
 
         var assertEndpointInput = InputFieldFactory.CreateTextBox("Assert endpoint:", lifetime, placeholder: DefaultEndpoint,
@@ -101,6 +110,9 @@ public abstract class BaseCreateUpdateDialog<T>(SolutionTypeElementsAccessor sol
         AdviseToSetTypeFromEndpoint(actEndpointTextBox, solution, requestActTypePicker, ActHttpVerb, ResolverFromParameter, lifetime);
         AdviseToSetTypeFromEndpoint(assertEndpointTextBox, solution, responseAssertTypePicker, "GET", ResolverFromReturnValue, lifetime);
         AdviseToChangeAssertRoute(actEndpointTextBox, assertEndpointTextBox, solution, lifetime);
+
+        if (EntityInputEnabled)
+            AdviseToSetEntity(actEndpointTextBox, solution, lifetime);
 
         // Assert stage group
         var assertCheckbox = BeControls.GetCheckBox("Enable", Guid.NewGuid().ToString(), lifetime)!;
@@ -167,6 +179,22 @@ public abstract class BaseCreateUpdateDialog<T>(SolutionTypeElementsAccessor sol
                 classPicker.Value.SetValue(typed);
             });
         });
+    }
+
+    private void AdviseToSetEntity(BeTextBox actEndpointTextBox, ISolution solution, Lifetime lifetime)
+    {
+        actEndpointTextBox.Text.Change.Advise(lifetime, newUrl =>
+            {
+                var endpoint = solution.ResolveHttpEndpoint<AspNetHttpEndpoint>(newUrl, ActHttpVerb);
+                if (endpoint is null) return;
+                solution.Locks.ExecuteWithReadLock(() =>
+                {
+                    var entity = endpoint.FindEntityUsingControllerName(solutionTypeElementsAccessor.Classes);
+
+                    if (entity is not null)
+                        SearchableClassPickers[ComponentsIdentity.EntityInput].Value.SetValue(entity);
+                });
+            });
     }
 
     private static Func<AspNetHttpEndpoint?, IType?> ResolverFromReturnValue

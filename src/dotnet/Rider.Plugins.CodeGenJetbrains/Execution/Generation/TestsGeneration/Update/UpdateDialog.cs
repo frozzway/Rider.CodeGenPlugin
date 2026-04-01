@@ -18,6 +18,7 @@ public class UpdateDialog(SolutionTypeElementsAccessor accessor)
     protected override string DefaultCaseName => "Успешное редактирование сущности";
     protected override string Verb => "Update";
     protected override string ActHttpVerb => "PUT";
+    protected override bool EntityInputEnabled => true;
 
     protected override InputFieldsForm InitializeAssertForm(
         Lifetime lifetime,
@@ -59,6 +60,7 @@ public class UpdateDialog(SolutionTypeElementsAccessor accessor)
             CaseName: testCaseTextBox.TryGetText().DefaultIfEmpty(DefaultCaseName),
             RequestEndpoint: actEndpointTextBox.TryGetText().DefaultIfEmpty(DefaultEndpoint).RemoveLastPart(),
             RequestType: SearchableClassPickers[ComponentsIdentity.RequestActType].Value.GetValue(),
-            AssertRequestInfo: assertRequestDto);
+            AssertRequestInfo: assertRequestDto,
+            Entity: SearchableClassPickers[ComponentsIdentity.EntityInput].Value.GetValue());
     }
 }

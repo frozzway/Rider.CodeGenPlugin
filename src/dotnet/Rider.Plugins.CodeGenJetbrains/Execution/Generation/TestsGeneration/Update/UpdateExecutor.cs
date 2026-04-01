@@ -1,4 +1,5 @@
-﻿using JetBrains.ProjectModel;
+﻿using Humanizer;
+using JetBrains.ProjectModel;
 using Rider.Plugins.CodeGenJetbrains.Extensions;
 using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Abstract;
 using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models;
@@ -39,6 +40,11 @@ public class UpdateExecutor : BaseExecutor<UpdateTestDto>
             },
             TestModel = new FUpdateTestModel { Type = GetFType(folderNamespace, dto.FilesPrefix, "TestModel") },
             TestSuite = new FUpdateTestSuite { Type = GetFType(folderNamespace, dto.FilesPrefix, "TestSuite") },
+            Entity = new FTestEntity
+            {
+                Type = dto.Entity.ToFType(),
+                PluralName = dto.Entity?.ShortName.Pluralize()
+            }
         };
 
         if (dto.AssertRequestInfo != null)
