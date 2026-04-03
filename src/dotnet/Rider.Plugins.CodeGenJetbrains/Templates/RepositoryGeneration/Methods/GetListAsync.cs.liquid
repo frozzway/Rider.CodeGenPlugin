@@ -30,18 +30,18 @@ public async Task<{{ EntityList.Name }}> GetListAsync(
     var definition = new CommandDefinition(
         dataSql,
         parameters,
-        transaction: _unitOfWork.Transaction,
+        transaction: unitOfWork.Transaction,
         cancellationToken: cancellationToken);
 
-    var data = await _unitOfWork.Connection.QueryAsync<{{Entity.Name}}>(definition);
+    var data = await unitOfWork.Connection.QueryAsync<{{Entity.Name}}>(definition);
 
     var countCommand = new CommandDefinition(
         countSql,
         parameters,
-        transaction: _unitOfWork.Transaction,
+        transaction: unitOfWork.Transaction,
         cancellationToken: cancellationToken);
 
-    var count = await _unitOfWork.Connection.ExecuteScalarAsync<int>(countCommand);
+    var count = await unitOfWork.Connection.ExecuteScalarAsync<int>(countCommand);
 
     return new {{ EntityList.Name }}
     {

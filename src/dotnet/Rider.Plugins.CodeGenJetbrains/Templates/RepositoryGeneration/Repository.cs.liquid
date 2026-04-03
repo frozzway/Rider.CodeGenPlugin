@@ -1,17 +1,20 @@
 namespace {{ Type.Namespace }};
 
-public class {{ Type.Name }}(IUnitOfWork _unitOfWork)
+public class {{ Type.Name }}(IUnitOfWork unitOfWork)
 {
-    {% if Methods contains 'AddOrUpdateAsync' %}
+    {%- if Methods contains 'AddOrUpdateAsync' -%}
     {% include 'RepositoryGeneration.Methods.AddOrUpdateAsync.cs.liquid' %}
-    {% endif %}
-    {% if Methods contains 'AddOrUpdateRangeAsync' %}
+    {%- endif %}
+
+    {%- if Methods contains 'AddOrUpdateRangeAsync' -%}
     {% include 'RepositoryGeneration.Methods.AddOrUpdateRangeAsync.cs.liquid' %}
-    {% endif %}
-    {% if Methods contains 'GetManyAsync' %}
+    {%- endif %}
+
+    {%- if Methods contains 'GetManyAsync' -%}
     {% include 'RepositoryGeneration.Methods.GetManyAsync.cs.liquid' %}
-    {% endif %}
-    {% if Methods contains 'GetListAsync' %}
+    {%- endif %}
+
+    {%- if Methods contains 'GetListAsync' -%}
     {% include 'RepositoryGeneration.Methods.GetListAsync.cs.liquid' %}
-    {% endif %}
+    {%- endif %}
 }

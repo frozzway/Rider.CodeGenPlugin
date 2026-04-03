@@ -46,8 +46,8 @@ public async Task AddOrUpdateRangeAsync(
     var definition = new CommandDefinition(
         sql,
         parameters,
-        transaction: _unitOfWork.Transaction,
+        transaction: unitOfWork.Transaction,
         cancellationToken: ct);
 
-    await _unitOfWork.Connection.ExecuteAsync(definition);
+    await unitOfWork.Connection.ExecuteAsync(definition);
 }

@@ -30,8 +30,8 @@ public async Task<Guid> AddOrUpdateAsync(
     var cd = new CommandDefinition(
         sql,
         entity,
-        transaction: _unitOfWork.Transaction,
+        transaction: unitOfWork.Transaction,
         cancellationToken: ct);
 
-    return await _unitOfWork.Connection.ExecuteScalarAsync<Guid>(cd);
+    return await unitOfWork.Connection.ExecuteScalarAsync<Guid>(cd);
 }
