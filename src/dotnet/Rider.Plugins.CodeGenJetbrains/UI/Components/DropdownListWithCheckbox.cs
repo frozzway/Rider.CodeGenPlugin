@@ -14,6 +14,7 @@ public class DropdownListWithCheckbox<T> where T : notnull
 {
     public BeControl Control { get; }
     public ImmutableArray<T?> SelectedItems => [.._rows.Select(r => r.IsChecked.Value ? r.Dropdown.CurrentValue.Value : default)];
+    public ImmutableArray<Row> Rows => [.._rows];
 
     private readonly IListEvents<Row> _rows;
     private readonly bool _checkedByDefault;
@@ -21,7 +22,7 @@ public class DropdownListWithCheckbox<T> where T : notnull
     private LifetimeDefinition _dropdownLifetime;
     private readonly PresentComboItem<T, BeControl>? _dropdownPresentation;
 
-    private record Row(BeControl? FirstColumn, InputField<T> Dropdown, T? DropdownInitialValue)
+    public record Row(BeControl? FirstColumn, InputField<T> Dropdown, T? DropdownInitialValue)
     {
         public Property<bool> IsChecked { get; set; }
     };

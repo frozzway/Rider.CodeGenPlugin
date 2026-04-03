@@ -1,0 +1,15 @@
+/// <summary>
+/// Добавить сущность "{{ Entity.SummaryName }}"
+/// </summary>
+/// <param name="request">Запрос добавления сущности "{{ Entity.SummaryName }}"</param>
+/// <param name="ct">Токен отмены</param>
+[HttpPost]
+{%- if PermissionCodes["AddAsync"] %}
+[AuthorizePermissions({{PermissionEnum}}.{{PermissionCodes["AddAsync"]}})]
+{%- endif %}
+[ProducesResponseType(typeof(GuidResponse), StatusCodes.Status201Created)]
+public async Task<ActionResult<GuidResponse>> AddAsync(Add{{ Entity.Type.Name }}Request request, CancellationToken ct)
+{
+    var result = await Mediator.Send(request.ToCreateCommand(), ct);
+    return result.Match<ActionResult>(r => Created(new GuidResponse(r)), MapApiError);
+}

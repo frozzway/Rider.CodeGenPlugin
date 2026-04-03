@@ -1,0 +1,17 @@
+/// <summary>
+/// Получить таблицу сущностей "{{ Entity.SummaryName }}"
+/// </summary>
+/// <param name="request">Параметры запроса</param>
+/// <param name="ct">Токен отмены</param>
+/// <returns>Табличные данные</returns>
+[HttpGet("grid")]
+{%- if PermissionCodes["GetGridAsync"] %}
+[AuthorizePermissions({{PermissionEnum}}.{{PermissionCodes["GetGridAsync"]}})]
+{%- endif %}
+[ProducesResponseType(typeof(PagedResponse<{{ Entity.Type.Name }}GridResponse>), StatusCodes.Status200OK)]
+public async Task<ActionResult<PagedResponse<{{ Entity.Type.Name }}GridResponse>>> GetGridAsync(
+    [FromQuery] SieveModel request, CancellationToken ct)
+{
+    var result = await Mediator.Send(new Get{{ Entity.Type.Name }}GridQuery(request), ct);
+    return result.Match<ActionResult>(r => Ok(r.ToPagedResponse(i => i.ToGridResponse())), MapApiError);
+}

@@ -8,12 +8,15 @@ namespace Rider.Plugins.CodeGenJetbrains.Execution.Common;
 
 public class SolutionTypeElementsAccessor
 {
-    public IClass[] Classes { get; private set; }
+    public ITypeElement[] TypeElements { get; }
+
+    public IClass[] Classes => TypeElements.OfType<IClass>().ToArray();
+    public IEnum[] Enums => TypeElements.OfType<IEnum>().ToArray();
 
     public SolutionTypeElementsAccessor()
     {
         var solution = Shell.Instance.GetComponent<SolutionsManager>().Solution;
-        var items = solution!.GetAllTypeElements();
-        Classes = items.OfType<IClass>().OrderBy(i => i.ShortName).ToArray();
+        var items = solution!.GetAllTypeElements().OrderBy(i => i.ShortName).ToArray();
+        TypeElements = items;
     }
 }

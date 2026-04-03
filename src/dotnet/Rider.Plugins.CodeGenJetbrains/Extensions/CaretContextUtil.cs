@@ -1,10 +1,13 @@
-﻿using JetBrains.Application.DataContext;
+﻿using System.Linq;
+using JetBrains.Application.DataContext;
 using JetBrains.Application.Threading;
 using JetBrains.ProjectModel.DataContext;
 using JetBrains.ReSharper.Feature.Services.Navigation.ContextNavigation;
+using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.DataContext;
 using JetBrains.ReSharper.Psi.Tree;
+using JetBrains.TextControl;
 using JetBrains.TextControl.DataContext;
 
 namespace Rider.Plugins.CodeGenJetbrains.Extensions;
@@ -46,5 +49,31 @@ public static class CaretContextUtil
         classDecl = containingType;
 
         return true;
+    }
+
+    public static void AddMethodAtCaret(this IClassLikeDeclaration declaration, IDataContext context, string content)
+    {
+        var textControl = context.GetData(TextControlDataConstants.TEXT_CONTROL)!;
+
+        var caretOffset = textControl.Caret.Offset();
+
+        // Берём только прямых детей класса (MemberDeclarations именно для этого)
+        var members = declaration.MemberDeclarations.OfType<IClassMemberDeclaration>().ToList();
+
+        // Находим "следующий" member после каретки
+        var nextMember = members
+            .Select(m => new { Member = m, Range = m.GetDocumentRange() })
+            .Where(x => x.Range.IsValid())
+            .OrderBy(x => x.Range.TextRange.StartOffset)
+            .FirstOrDefault(x => x.Range.TextRange.StartOffset > caretOffset)
+            ?.Member;
+
+        var factory = CSharpElementFactory.GetInstance(declaration, applyCodeFormatter: false);
+        var method = (IMethodDeclaration)factory.CreateTypeMemberDeclaration(content);
+
+        if (nextMember != null)
+            declaration.AddClassMemberDeclarationBefore(method, nextMember);
+        else
+            declaration.AddClassMemberDeclaration(method);
     }
 }

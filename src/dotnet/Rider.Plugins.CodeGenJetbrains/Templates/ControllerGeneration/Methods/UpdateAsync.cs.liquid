@@ -1,0 +1,17 @@
+/// <summary>
+/// Редактировать сущность "{{ Entity.SummaryName }}"
+/// </summary>
+/// <param name="id">Идентификатор сущности "{{ Entity.SummaryName }}"</param>
+/// <param name="request">Запрос редактирования сущности "{{ Entity.SummaryName }}"</param>
+/// <param name="ct">Токен отмены</param>
+[HttpPut("{id:guid}")]
+{%- if PermissionCodes["UpdateAsync"] %}
+[AuthorizePermissions({{PermissionEnum}}.{{PermissionCodes["UpdateAsync"]}})]
+{%- endif %}
+[ProducesResponseType(StatusCodes.Status204NoContent)]
+[ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+public async Task<ActionResult> UpdateAsync(Guid id, Update{{ Entity.Type.Name }}Request request, CancellationToken ct)
+{
+    var result = await Mediator.Send(request.ToUpdateCommand(id), ct);
+    return result.Match<ActionResult>(_ => NoContent(), MapApiError);
+}

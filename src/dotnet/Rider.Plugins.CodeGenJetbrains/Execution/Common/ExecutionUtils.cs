@@ -33,18 +33,23 @@ public static class ExecutionUtils
         return folder;
     }
 
+    public static IClass? FindEntityByControllerName(
+        this string controllerName,
+        IReadOnlyCollection<IClass> classes)
+        => controllerName
+            .TrimFromStart("Admin")
+            .TrimFromEnd("Controller")
+            .Singularize()
+            .FindEntityByName(classes);
+
+    public static IClass? FindEntityByName(
+        this string targetEntityName,
+        IReadOnlyCollection<IClass> classes)
+        => classes.FirstOrDefault(i => i.GetContainingNamespace().QualifiedName.Contains("Core")
+                                       && i.ShortName == targetEntityName);
+
     public static IClass? FindEntityUsingControllerName(
         this AspNetHttpEndpoint endpoint,
         IReadOnlyCollection<IClass> classes)
-    {
-        var targetEntityName = endpoint.Controller.ShortName
-            .TrimFromStart("Admin")
-            .TrimFromEnd("Controller")
-            .Singularize();
-
-        var entity = classes
-            .FirstOrDefault(i => i.GetContainingNamespace().QualifiedName.Contains("Core")
-                                 && i.ShortName == targetEntityName);
-        return entity;
-    }
+        => endpoint.Controller.ShortName.FindEntityByControllerName(classes);
 }

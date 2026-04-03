@@ -1,0 +1,16 @@
+/// <summary>
+/// Получить сущность "{{ Entity.SummaryName }}"
+/// </summary>
+/// <param name="id">Идентификатор сущности "{{ Entity.SummaryName }}"</param>
+/// <param name="ct">Токен отмены</param>
+[HttpGet("{id:guid}")]
+{%- if PermissionCodes["GetAsync"] %}
+[AuthorizePermissions({{PermissionEnum}}.{{PermissionCodes["GetAsync"]}})]
+{%- endif %}
+[ProducesResponseType(typeof({{ Entity.Type.Name }}Response), StatusCodes.Status200OK)]
+[ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+public async Task<ActionResult<{{ Entity.Type.Name }}Response>> GetAsync(Guid id, CancellationToken ct)
+{
+    var result = await Mediator.Send(new Get{{ Entity.Type.Name }}Query(id), ct);
+    return result.Match<ActionResult>(r => Ok(r.ToResponse()), MapApiError);
+}

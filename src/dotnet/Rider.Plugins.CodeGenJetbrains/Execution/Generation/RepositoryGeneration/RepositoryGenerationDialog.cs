@@ -123,7 +123,11 @@ public class RepositoryGenerationDialog(SolutionTypeElementsAccessor classesAcce
                 return;
             }
 
-            if (_entityPicker.Value.Value != null)
+            var entity = value.New.Name.ToPascalCase().FindEntityByName(classesAccessor.Classes);
+            if (entity is not null)
+                _entityPicker.Value.SetValue(entity);
+
+            if (_entityPicker.Value.Value is not null)
                 RefreshColumnList(rdDatabaseCaller);
         });
 

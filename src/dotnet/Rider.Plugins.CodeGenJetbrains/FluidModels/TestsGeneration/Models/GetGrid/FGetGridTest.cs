@@ -5,5 +5,5 @@ namespace Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models.GetG
 public class FGetGridTest : FTest
 {
     public FTestRequest Request { get; set; }
-    public FTestEntity Entity { get; set; }
+    public FEntity Entity { get; set; }
 }

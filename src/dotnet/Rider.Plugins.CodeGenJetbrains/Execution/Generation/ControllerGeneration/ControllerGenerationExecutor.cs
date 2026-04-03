@@ -1,29 +1,26 @@
 ﻿using System;
-using System.Linq;
+using Humanizer;
 using JetBrains.Application.DataContext;
 using JetBrains.Application.Threading;
 using JetBrains.ProjectModel;
 using JetBrains.ProjectModel.DataContext;
 using JetBrains.ReSharper.Psi;
-using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Tree;
-using JetBrains.TextControl;
-using JetBrains.TextControl.DataContext;
 using Rider.Plugins.CodeGenJetbrains.Execution.Abstract;
 using Rider.Plugins.CodeGenJetbrains.Execution.Common;
 using Rider.Plugins.CodeGenJetbrains.Extensions;
 using Rider.Plugins.CodeGenJetbrains.FluidModels;
-using Rider.Plugins.CodeGenJetbrains.FluidModels.RepositoryGeneration;
+using Rider.Plugins.CodeGenJetbrains.FluidModels.ControllerGeneration;
 
-namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.RepositoryGeneration;
+namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.ControllerGeneration;
 
-public class RepositoryGenerationExecutor : IExecutor<RepositoryGenerationDto>
+public class ControllerGenerationExecutor : IExecutor<ControllerGenerationDto>
 {
-    private const string Template = "RepositoryGeneration.Repository.cs.liquid";
-    private const string TemplateMethodPrefix = "RepositoryGeneration.Methods.";
+    private const string Template = "ControllerGeneration.Controller.cs.liquid";
+    private const string TemplateMethodPrefix = "ControllerGeneration.Methods.";
 
-    public void Execute(IDataContext context, RepositoryGenerationDto dto)
+    public void Execute(IDataContext context, ControllerGenerationDto dto)
     {
         var targetElement = context.GetData(ProjectModelDataConstants.PROJECT_MODEL_ELEMENT);
 
@@ -39,13 +36,13 @@ public class RepositoryGenerationExecutor : IExecutor<RepositoryGenerationDto>
     private static void GenerateImpl(
         IDataContext context,
         IClassLikeDeclaration declaration,
-        RepositoryGenerationDto dto)
+        ControllerGenerationDto dto)
     {
         var model = ToFModel(dto);
         declaration.GetSolution().Locks.ExecuteWithReadLock(() =>
         {
             declaration.GetPsiServices().Transactions.Execute(
-                "Generate Repository Method",
+                "Generate Controller Method",
                 () =>
                 {
                     foreach (var method in dto.Methods)
@@ -60,12 +57,12 @@ public class RepositoryGenerationExecutor : IExecutor<RepositoryGenerationDto>
         declaration.GetSourceFile()!.ToProjectFile()!.FixImportsInFile();
     }
 
-    private static void GenerateImpl(IProjectFolder folder, RepositoryGenerationDto dto)
+    private static void GenerateImpl(IProjectFolder folder, ControllerGenerationDto dto)
     {
         var model = ToFModel(dto);
         SetFType(model, folder, dto);
         var renderer = new FluidRenderer(model, Template);
-        var fileName = dto.EntityType.ShortName + "Repository.cs";
+        var fileName = dto.ControllerName + ".cs";
         var file = folder.CreateFileWithContent(fileName, fileContent: renderer.RenderContent());
         file.TryAddToGit()
             .FixImportsInFile(withProgress: true)
@@ -73,39 +70,31 @@ public class RepositoryGenerationExecutor : IExecutor<RepositoryGenerationDto>
             .MarkDirtyAndRefresh();
     }
 
-    private static void SetFType(FRepository model, IProjectFolder folder, RepositoryGenerationDto dto)
+    private static void SetFType(FController model, IProjectFolder folder, ControllerGenerationDto dto)
     {
         var expectedNamespace = folder.GetExpectedNamespace();
-        var repositoryName = dto.EntityType.ShortName + "Repository";
+        var controllerName = dto.ControllerName;
         model.Type = new FType
         {
             Namespace = expectedNamespace,
-            Name = repositoryName
+            Name = controllerName
         };
     }
 
-    private static FRepository ToFModel(RepositoryGenerationDto dto)
+    private static FController ToFModel(ControllerGenerationDto dto)
     {
-        var model = new FRepository
+        var model = new FController
         {
-            Entity = dto.EntityType.ToFType(),
-            EntityList = dto.EntityListType.ToFType(),
-            Table = new FTable
+            Methods = dto.Methods,
+            Entity = new FEntity
             {
-                Name = dto.TableName,
-                Schema = dto.SchemaName
+                Type = dto.Entity.ToFType(),
+                PluralName = dto.Entity.ShortName.Pluralize(),
+                SummaryName = dto.EntitySummaryName
             },
-            Properties = [..dto.Properties.Select(ToFEntityProperty)],
-            Methods = [..dto.Methods]
+            PermissionEnum = dto.PermissionEnum,
+            PermissionCodes = dto.PermissionCodes
         };
         return model;
     }
-
-    private static FEntityProperty ToFEntityProperty(DbProperty property)
-        => new()
-        {
-            Name = property.Name,
-            IsPrimaryKey = property.IsPrimaryKey,
-            Column = property.Column
-        };
 }

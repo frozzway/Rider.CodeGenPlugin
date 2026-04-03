@@ -26,6 +26,7 @@ class CodeGenActionGroup : DefaultActionGroup(
           UpdateTestAction(),
           GetManyTestAction(),
           GetGridTestAction(),
-          GenerateRepositoryAction())
+          GenerateRepositoryAction(),
+          GenerateControllerAction())
     }
 }

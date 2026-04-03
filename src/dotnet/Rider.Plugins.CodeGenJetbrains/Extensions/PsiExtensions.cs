@@ -33,6 +33,13 @@ public static class PsiExtensions
             Namespace = typeElement?.GetContainingNamespace().QualifiedName ?? string.Empty,
         };
 
+    public static string? GetSummary(this IDeclaredElement? element)
+    {
+        var xmlDoc = element?.GetXMLDoc(inherit: false);
+        var summaryNode = xmlDoc?.SelectSingleNode("summary");
+        return summaryNode?.InnerText.Trim();
+    }
+
     public static string GetExpectedNamespace(this IProjectItem projectItem)
     {
         var solution = projectItem.GetSolution();

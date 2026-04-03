@@ -1,0 +1,13 @@
+/// <summary>
+/// Получить список сущностей "{{ Entity.SummaryName }}"
+/// </summary>
+[HttpGet]
+{%- if PermissionCodes["GetManyAsync"] %}
+[AuthorizePermissions({{PermissionEnum}}.{{PermissionCodes["GetManyAsync"]}})]
+{%- endif %}
+[ProducesResponseType(typeof(IReadOnlyList<{{ Entity.Type.Name }}Response>), StatusCodes.Status200OK)]
+public async Task<ActionResult<IReadOnlyList<{{ Entity.Type.Name }}Response>>> GetManyAsync(CancellationToken ct)
+{
+    var result = await Mediator.Send(new Get{{ Entity.PluralName }}Query(), ct);
+    return result.Match<ActionResult>(r => Ok(r.Select(i => i.ToResponse())), MapApiError);
+}

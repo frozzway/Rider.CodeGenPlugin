@@ -1,0 +1,33 @@
+namespace {{ Type.Namespace }};
+
+/// <summary>
+/// Контроллер для сущности "{{ Entity.SummaryName }}"
+/// </summary>
+[ApiController]
+[Route("")]
+public class {{ Type.Name }} : MediatorController
+{
+    {%- if Methods contains 'AddAsync' -%}
+    {% include 'ControllerGeneration.Methods.AddAsync.cs.liquid' %}
+    {%- endif %}
+
+    {%- if Methods contains 'UpdateAsync' -%}
+    {% include 'ControllerGeneration.Methods.UpdateAsync.cs.liquid' %}
+    {%- endif %}
+
+    {%- if Methods contains 'GetAsync' -%}
+    {% include 'ControllerGeneration.Methods.GetAsync.cs.liquid' %}
+    {%- endif %}
+
+    {%- if Methods contains 'GetGridAsync' -%}
+    {% include 'ControllerGeneration.Methods.GetGridAsync.cs.liquid' %}
+    {%- endif %}
+
+    {%- if Methods contains 'GetExcelAsync' -%}
+    {% include 'ControllerGeneration.Methods.GetExcelAsync.cs.liquid' %}
+    {%- endif %}
+
+    {%- if Methods contains 'GetManyAsync' -%}
+    {% include 'ControllerGeneration.Methods.GetManyAsync.cs.liquid' %}
+    {%- endif %}
+}

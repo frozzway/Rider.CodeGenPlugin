@@ -1,0 +1,14 @@
+/// <summary>
+/// Получить excel-таблицу сущностей "{{ Entity.SummaryName }}"
+/// </summary>
+[HttpGet("excel")]
+{%- if PermissionCodes["GetExcelAsync"] %}
+[AuthorizePermissions({{PermissionEnum}}.{{PermissionCodes["GetExcelAsync"]}})]
+{%- endif %}
+[ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK, ContentTypes.Xlsx)]
+[ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK, ContentTypes.Csv)]
+public async Task<ActionResult> GetExcelAsync([FromQuery] Get{{ Entity.Type.Name }}GridExcelRequest request, CancellationToken ct)
+{
+    var result = await Mediator.Send(request.ToExcelQuery(), ct);
+    return result.Match<ActionResult>(r => File(r.Content, r.ContentType, r.Name), MapApiError);
+}

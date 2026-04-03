@@ -1,6 +1,7 @@
 ﻿using Humanizer;
 using JetBrains.ProjectModel;
 using Rider.Plugins.CodeGenJetbrains.Extensions;
+using Rider.Plugins.CodeGenJetbrains.FluidModels;
 using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Abstract;
 using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models;
 using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models.Update;
@@ -40,7 +41,7 @@ public class UpdateExecutor : BaseExecutor<UpdateTestDto>
             },
             TestModel = new FUpdateTestModel { Type = GetFType(folderNamespace, dto.FilesPrefix, "TestModel") },
             TestSuite = new FUpdateTestSuite { Type = GetFType(folderNamespace, dto.FilesPrefix, "TestSuite") },
-            Entity = new FTestEntity
+            Entity = new FEntity
             {
                 Type = dto.Entity.ToFType(),
                 PluralName = dto.Entity?.ShortName.Pluralize()
