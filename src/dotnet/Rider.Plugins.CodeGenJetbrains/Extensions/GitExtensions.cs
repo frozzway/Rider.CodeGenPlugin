@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Diagnostics;
 using JetBrains.ProjectModel;
+using JetBrains.Rd.Tasks;
+using JetBrains.ReSharper.Feature.Services.Protocol;
+using Rider.Plugins.CodeGenJetbrains.Model;
 
 namespace Rider.Plugins.CodeGenJetbrains.Extensions;
 
 public static class GitExtensions
 {
-    public static IProjectFile TryAddToGit(this IProjectFile projectFile)
+    [Obsolete("Use TryAddToGit() instead")]
+    public static IProjectFile TryAddToGitOld(this IProjectFile projectFile)
     {
         var fullPath = projectFile.Location.FullPath;
         var folderDir = projectFile.Location.Directory.FullPath;
@@ -14,6 +18,15 @@ public static class GitExtensions
         if (IsGitRepository(folderDir))
             RunGitCommand(folderDir, $"add \"{fullPath}\"");
 
+        return projectFile;
+    }
+
+    public static IProjectFile TryAddToGit(this IProjectFile projectFile)
+    {
+        var solution = projectFile.GetSolution();
+        var model = solution.GetProtocolSolution().GetRdCodeGenJetbrainsModel();
+        var path = projectFile.Location.FullPath;
+        ((RdCall<string, bool>)model.AddToVcs).Start(path);
         return projectFile;
     }
 

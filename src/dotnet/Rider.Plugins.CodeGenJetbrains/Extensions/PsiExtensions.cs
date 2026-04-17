@@ -8,6 +8,7 @@ using JetBrains.ReSharper.Feature.Services.Web.AspRouteTemplates.EndpointsProvid
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.Caches;
 using JetBrains.ReSharper.Psi.CSharp;
+using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.ReSharper.Psi.Util;
 using Rider.Plugins.CodeGenJetbrains.FluidModels;
 
@@ -35,7 +36,12 @@ public static class PsiExtensions
 
     public static string? GetSummary(this IDeclaredElement? element)
     {
-        var xmlDoc = element?.GetXMLDoc(inherit: false);
+        if (element is null)
+            return null;
+
+        using var readLock = element.GetSolution().Locks.UsingReadLock();
+        using var compilationContext = CompilationContextCookie.GetExplicitUniversalContextIfNotSet();
+        var xmlDoc = element.GetXMLDoc(inherit: false);
         var summaryNode = xmlDoc?.SelectSingleNode("summary");
         return summaryNode?.InnerText.Trim();
     }
@@ -43,18 +49,61 @@ public static class PsiExtensions
     public static string GetExpectedNamespace(this IProjectItem projectItem)
     {
         var solution = projectItem.GetSolution();
-        string? namespaceStr = null;
-        solution.Locks.ExecuteWithWriteLock(() => namespaceStr = projectItem.CalculateExpectedNamespace(CSharpLanguage.Instance!));
-        return namespaceStr!;
+        using var readLock = solution.Locks.UsingReadLock();
+        return projectItem.CalculateExpectedNamespace(CSharpLanguage.Instance!);
     }
 
     public static T? ResolveHttpEndpoint<T>(this ISolution solution, string url, string httpVerb) where T: IHttpEndpoint
     {
-        var endpointsProvider = solution.GetComponent<IHttpEndpointsProvider>();
-        var roots = endpointsProvider.GetEndpointsTreeRoots();
+        var endpointsProviders = solution.GetComponents2<IHttpEndpointsProvider>();
+        var roots = endpointsProviders.SelectMany(p => p.GetEndpointsTreeRoots());
         var allRoutes = roots.FlattenRoutes().OfType<T>();
         return allRoutes.FirstOrDefault(e =>
             e.BuildRouteString() == url
             && e.Verb.ToString() == httpVerb);
+    }
+
+    public static bool HasMatchingSignature(this IMethodDeclaration newMethod, IEnumerable<IMethodDeclaration> existingMethods)
+    {
+        return existingMethods.Any(existing =>
+        {
+            if (existing.DeclaredName != newMethod.DeclaredName)
+                return false;
+
+            // Совпадает ли количество generic-аргументов (например, метод<T> и метод<T, K>)
+            if (existing.TypeParameterDeclarations.Count != newMethod.TypeParameterDeclarations.Count)
+                return false;
+
+            var existingParams = existing.Params.ParameterDeclarations;
+            var newParams = newMethod.Params.ParameterDeclarations;
+
+            // Совпадает ли количество параметров?
+            if (existingParams.Count != newParams.Count)
+                return false;
+
+            // Попарно сравниваем типы и модификаторы параметров
+            for (int i = 0; i < existingParams.Count; i++)
+            {
+                // Берем текстовое представление типа (например, "int", "string", "MyDto")
+                // TypeUsage может быть null у некорректных деклараций, подстрахуемся
+                var existingTypeStr = existingParams[i].TypeUsage?.GetText() ?? string.Empty;
+                var newTypeStr = newParams[i].TypeUsage?.GetText() ?? string.Empty;
+
+                // Сравниваем типы (убираем возможные лишние пробелы для надежности)
+                if (existingTypeStr.Replace(" ", "") != newTypeStr.Replace(" ", ""))
+                {
+                    return false;
+                }
+
+                // Дополнительно проверяем модификаторы (ref, out, in), если они используются в вашем маппере
+                if (existingParams[i].Kind != newParams[i].Kind)
+                {
+                    return false;
+                }
+            }
+
+            // Имя, количество параметров и все их типы совпали — это дубликат сигнатуры
+            return true;
+        });
     }
 }

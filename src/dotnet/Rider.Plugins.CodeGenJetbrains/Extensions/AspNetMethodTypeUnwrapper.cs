@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using JetBrains.ReSharper.Psi;
-using JetBrains.ReSharper.Psi.Util;
 
 namespace Rider.Plugins.CodeGenJetbrains.Extensions;
 
@@ -8,6 +7,8 @@ public static class AspNetMethodTypeUnwrapper
 {
     public static IType? GetUnwrappedType(this IType type)
     {
+        using var compilationContext = CompilationContextCookie.GetExplicitUniversalContextIfNotSet();
+
         // 1. Если это Task<T>, достаем T
         if (type.IsGenericTask() || type.IsGenericValueTask())
         {

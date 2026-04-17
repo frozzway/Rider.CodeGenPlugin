@@ -1,7 +1,6 @@
 ﻿using System;
 using JetBrains.Application.DataContext;
 using JetBrains.ProjectModel;
-using JetBrains.ProjectModel.DataContext;
 using JetBrains.Util;
 using Rider.Plugins.CodeGenJetbrains.Execution.Abstract;
 using Rider.Plugins.CodeGenJetbrains.Execution.Common;
@@ -11,7 +10,7 @@ using Rider.Plugins.CodeGenJetbrains.FluidModels.CommandGeneration;
 
 namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.CommandGeneration;
 
-public class CommandGenerationExecutor : IExecutor<CommandGenerationDto>
+public class CommandGenerationExecutor(IContextAccessor contextAccessor) : IExecutor<CommandGenerationDto>
 {
     private const string CommandTemplate = "CommandGeneration.Command.cs.liquid";
     private const string HandlerTemplate = "CommandGeneration.Handler.cs.liquid";
@@ -19,12 +18,10 @@ public class CommandGenerationExecutor : IExecutor<CommandGenerationDto>
 
     public void Execute(IDataContext context, CommandGenerationDto dto)
     {
-        var targetElement = context.GetData(ProjectModelDataConstants.PROJECT_MODEL_ELEMENT);
+        if (contextAccessor.Target is not ActionTarget.Folder targetFolder)
+            throw new InvalidOperationException();
 
-        if (targetElement is IProjectFolder folder)
-            GenerateImpl(folder, dto);
-
-        else throw new InvalidOperationException();
+        GenerateImpl(targetFolder.ProjectFolder, dto);
     }
 
     private static void GenerateImpl(IProjectFolder folder, CommandGenerationDto dto)

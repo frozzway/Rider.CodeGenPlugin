@@ -1,4 +1,5 @@
 ﻿using JetBrains.ProjectModel;
+using Rider.Plugins.CodeGenJetbrains.Execution.Abstract;
 using Rider.Plugins.CodeGenJetbrains.Extensions;
 using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Abstract;
 using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models;
@@ -6,7 +7,7 @@ using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models.Create;
 
 namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.TestsGeneration.Create;
 
-public class CreateExecutor : BaseExecutor<CreateTestDto>
+public class CreateExecutor(IContextAccessor contextAccessor) : BaseExecutor<CreateTestDto>(contextAccessor)
 {
     protected override string TestModelTemplate => "TestsGeneration.Create.TestModel.cs.liquid";
     protected override string TestCaseTemplate => "TestsGeneration.Create.TestCase.cs.liquid";

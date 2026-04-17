@@ -7,7 +7,6 @@ using JetBrains.IDE.UI.Extensions;
 using JetBrains.IDE.UI.Extensions.Properties;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
-using JetBrains.ReSharper.Feature.Services.UI.Automation;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.Rider.Model.UIAutomation;

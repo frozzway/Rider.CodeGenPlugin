@@ -19,7 +19,7 @@ public static class QuickFixesExtensions
     {
         var solution = projectFile.GetSolution();
 
-        using var readLock = solution.Locks.UsingReadLock();
+        using var writeLock = solution.Locks.UsingWriteLock();
 
         // 1. Получаем PSI Source File
         var sourceFile = projectFile.ToSourceFile();

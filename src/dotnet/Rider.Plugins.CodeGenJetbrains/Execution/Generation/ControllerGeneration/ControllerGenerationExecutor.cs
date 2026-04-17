@@ -1,12 +1,8 @@
-﻿using System;
-using Humanizer;
+﻿using Humanizer;
 using JetBrains.Application.DataContext;
-using JetBrains.Application.Threading;
 using JetBrains.ProjectModel;
-using JetBrains.ProjectModel.DataContext;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.Tree;
 using Rider.Plugins.CodeGenJetbrains.Execution.Abstract;
 using Rider.Plugins.CodeGenJetbrains.Execution.Common;
 using Rider.Plugins.CodeGenJetbrains.Extensions;
@@ -15,55 +11,60 @@ using Rider.Plugins.CodeGenJetbrains.FluidModels.ControllerGeneration;
 
 namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.ControllerGeneration;
 
-public class ControllerGenerationExecutor : IExecutor<ControllerGenerationDto>
+public class ControllerGenerationExecutor(
+    IContextAccessor contextAccessor,
+    ControllerMapperGenerationService mapperService)
+    : IExecutor<ControllerGenerationDto>
 {
     private const string Template = "ControllerGeneration.Controller.cs.liquid";
     private const string TemplateMethodPrefix = "ControllerGeneration.Methods.";
 
     public void Execute(IDataContext context, ControllerGenerationDto dto)
     {
-        var targetElement = context.GetData(ProjectModelDataConstants.PROJECT_MODEL_ELEMENT);
+        mapperService.AddMapperMethods(dto.Entity.ShortName, dto.Methods);
 
-        if (targetElement is IProjectFolder folder)
-            GenerateImpl(folder, dto);
+        switch (contextAccessor.Target)
+        {
+            case ActionTarget.Folder targetFolder:
+                GenerateImpl(targetFolder.ProjectFolder, dto);
+                break;
 
-        else if (CaretContextUtil.IsCaretInsideCSharpClassButNotMethod(context, out var declaration))
-            GenerateImpl(context, declaration, dto);
-
-        else throw new InvalidOperationException();
+            case ActionTarget.Declaration targetClass:
+                GenerateImpl(contextAccessor.Snapshot, targetClass.ClassDeclaration, dto);
+                break;
+        }
     }
 
-    private static void GenerateImpl(
+    private void GenerateImpl(
         IDataContext context,
         IClassLikeDeclaration declaration,
         ControllerGenerationDto dto)
     {
         var model = ToFModel(dto);
-        declaration.GetSolution().Locks.ExecuteWithReadLock(() =>
-        {
-            declaration.GetPsiServices().Transactions.Execute(
-                "Generate Controller Method",
-                () =>
+        contextAccessor.PsiServices.Transactions.Execute(
+            "Generate Controller Method",
+            () =>
+            {
+                foreach (var method in dto.Methods)
                 {
-                    foreach (var method in dto.Methods)
-                    {
-                        var template = TemplateMethodPrefix + method + ".cs.liquid";
-                        var renderer = new FluidRenderer(model, template);
-                        declaration.AddMethodAtCaret(context, renderer.RenderContent());
-                    }
-                });
-        });
+                    var template = TemplateMethodPrefix + method + ".cs.liquid";
+                    var renderer = new FluidRenderer(model, template);
+                    declaration.AddMethodAtCaret(context, renderer.RenderContent());
+                }
+            });
 
-        declaration.GetSourceFile()!.ToProjectFile()!.FixImportsInFile();
+        var file = declaration.GetSourceFile()!.ToProjectFile()!;
+        file.FixImportsInFile();
     }
 
     private static void GenerateImpl(IProjectFolder folder, ControllerGenerationDto dto)
     {
         var model = ToFModel(dto);
         SetFType(model, folder, dto);
-        var renderer = new FluidRenderer(model, Template);
         var fileName = dto.ControllerName + ".cs";
-        var file = folder.CreateFileWithContent(fileName, fileContent: renderer.RenderContent());
+        var renderer = new FluidRenderer(model, Template);
+        var fileContent = renderer.RenderContent();
+        var file = folder.CreateFileWithContent(fileName, fileContent);
         file.TryAddToGit()
             .FixImportsInFile(withProgress: true)
             .ApplyFormatter()

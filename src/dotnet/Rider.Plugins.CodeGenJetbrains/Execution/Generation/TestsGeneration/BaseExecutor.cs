@@ -1,7 +1,6 @@
 ﻿using System;
 using JetBrains.Application.DataContext;
 using JetBrains.ProjectModel;
-using JetBrains.ProjectModel.DataContext;
 using Rider.Plugins.CodeGenJetbrains.Execution.Abstract;
 using Rider.Plugins.CodeGenJetbrains.Execution.Common;
 using Rider.Plugins.CodeGenJetbrains.Extensions;
@@ -10,7 +9,7 @@ using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Abstract;
 
 namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.TestsGeneration;
 
-public abstract class BaseExecutor<T> : IExecutor<T>
+public abstract class BaseExecutor<T>(IContextAccessor contextAccessor) : IExecutor<T>
 {
     private const string TestSuiteTemplate = "TestsGeneration.TestSuite.cs.liquid";
     protected abstract string TestModelTemplate { get; }
@@ -25,16 +24,18 @@ public abstract class BaseExecutor<T> : IExecutor<T>
 
     public void Execute(IDataContext context, T dto)
     {
-        var targetElement = context.GetData(ProjectModelDataConstants.PROJECT_MODEL_ELEMENT);
-
-        if (targetElement is not IProjectFolder folder)
+        if (contextAccessor.Target is not ActionTarget.Folder targetFolder)
             throw new InvalidOperationException();
 
-        GenerateImpl(folder, dto);
+        GenerateImpl(targetFolder.ProjectFolder, dto);
     }
+
+    protected virtual void PreGenerationImpl(IProjectFolder targetFolder, T dto) {}
+    protected virtual void PostGenerationImpl(IProjectFolder targetFolder, T dto) {}
 
     protected virtual void GenerateImpl(IProjectFolder selectedFolder, T dto)
     {
+        PreGenerationImpl(selectedFolder, dto);
         const string testCaseFolderName = "TestCases";
 
         if (selectedFolder.Name != SubFolderName)
@@ -52,6 +53,7 @@ public abstract class BaseExecutor<T> : IExecutor<T>
         selectedFolder.CreateFileFromModel(fModel.TestSuite, TestSuiteTemplate);
         selectedFolder.CreateFileFromModel(fModel.BaseTests, BaseTestTemplate);
         testCasesFolder.CreateFileFromModel(fModel.TestCase, TestCaseTemplate);
+        PostGenerationImpl(selectedFolder, dto);
     }
 
     protected static FType GetFType(string namespaceStr, string prefix, string name)

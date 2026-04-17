@@ -82,15 +82,19 @@ public class ControllerGenerationDialog(SolutionTypeElementsAccessor typeElement
         var permissionEnumInput = new InputField(lifetime, "Permission enum:", _permissionEnumPicker.Control);
 
         _permissionEnumPicker.Value.Change.Advise_NewNotNull(lifetime, _ => RefreshPermissionList());
-        _entityPicker.Value.Change.Advise_NewNotNull(lifetime, _ => RefreshPermissionList());
+        _entityPicker.Value.Change.Advise_NewNotNull(lifetime,
+            args =>
+            {
+                RefreshPermissionList();
+                var summary = args.New.GetSummary();
+                if (summary == null) return;
+                _entitySummaryInput.CurrentValue.SetValue(summary);
+            });
         _nameInput.CurrentValue.Change.Advise_NewNotNull(lifetime, args =>
             {
                 var entity = args.New.FindEntityByControllerName(typeElementsAccessor.Classes);
                 if (entity == null) return;
                 _entityPicker.Value.SetValue(entity);
-                var summary = entity.GetSummary();
-                if (summary == null) return;
-                _entitySummaryInput.CurrentValue.SetValue(summary);
             });
 
         if (classDeclaration != null)

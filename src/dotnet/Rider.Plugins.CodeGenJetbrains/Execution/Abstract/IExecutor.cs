@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
 using JetBrains.Application.DataContext;
-using JetBrains.ProjectModel;
 
 namespace Rider.Plugins.CodeGenJetbrains.Execution.Abstract;
 

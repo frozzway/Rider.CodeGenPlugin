@@ -1,15 +1,13 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using JetBrains.Application.Threading;
+using JetBrains.DocumentManagers.Transactions;
 using JetBrains.ProjectModel;
-using JetBrains.ProjectModel.Properties;
 using JetBrains.ReSharper.Feature.Services.Protocol;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CodeStyle;
 using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.Files;
 using JetBrains.Rider.Model;
-using JetBrains.Util;
 using JetBrains.Util.dataStructures;
 
 namespace Rider.Plugins.CodeGenJetbrains.Extensions;
@@ -22,24 +20,22 @@ public static class ProjectModelExtensions
         var protocolSolution = solution.GetProtocolSolution();
         var fileSystemModel = protocolSolution.GetFileSystemModel();
         var path = item.Location.FullPath;
-        fileSystemModel.RefreshPaths.Sync(new RdFsRefreshRequest([path], async: false));
+        fileSystemModel.RefreshPaths.Start(new RdFsRefreshRequest([path], async: true));
         return item;
     }
 
     public static ReadOnlyFrugalLocalList<IProjectFolder> GetSubFoldersWithLock(this IProjectFolder folder, string name)
     {
         var solution = folder.GetSolution();
-        ReadOnlyFrugalLocalList<IProjectFolder>? result = null;
-        solution.Locks.ExecuteWithWriteLock(() => result = folder.GetSubFolders(name));
-        return result!.Value;
+        using var readLock = solution.Locks.UsingReadLock();
+        return folder.GetSubFolders(name);
     }
 
     public static ReadOnlyFrugalLocalList<IProjectFile> GetSubFilesWithLock(this IProjectFolder folder, string name)
     {
         var solution = folder.GetSolution();
-        ReadOnlyFrugalLocalList<IProjectFile>? result = null;
-        solution.Locks.ExecuteWithWriteLock(() => result = folder.GetSubFiles(name));
-        return result!.Value;
+        using var readLock = solution.Locks.UsingReadLock();
+        return folder.GetSubFiles(name);
     }
 
     public static IProjectFile CreateFileWithContent(
@@ -48,25 +44,17 @@ public static class ProjectModelExtensions
         string fileContent)
     {
         var solution = parentFolder.GetSolution();
-        IProjectFile? newFile = null;
+        using var writeLock = solution.Locks.UsingWriteLock();
 
-        solution.Locks.ExecuteWithWriteLock(() =>
-        {
-            // 1. Создаём физический файл на диске
-            var filePath = parentFolder.Location.Combine(fileName);
-            File.WriteAllText(filePath.FullPath, fileContent);
+        // 1. Создаём физический файл на диске
+        var filePath = parentFolder.Location.Combine(fileName);
+        File.WriteAllText(filePath.FullPath, fileContent);
 
-            // 2. Создаём файл в проектной модели
-            var project = parentFolder.GetProject();
-            var propertiesFactory = solution.GetComponent<ProjectFilePropertiesFactory>();
-            var fileProperties = propertiesFactory.CreateProjectFileProperties(project.ProjectProperties);
-            var folderImpl = (ProjectFolderImpl)parentFolder;
-            newFile = folderImpl.DoCreateFile(fileName, filePath, fileProperties);
-            if (fileName.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
-                newFile.Properties.SetBuildAction(BuildAction.COMPILE, project.GetRandomTargetFrameworkId());
-        });
+        // 2. Создаем файл в проектной модели
+        var editor = solution.GetComponent<IProjectModelEditor>();
+        var newFile = editor.AddFile(parentFolder, filePath);
 
-        return newFile!;
+        return newFile;
     }
 
     public static IProjectFolder CreateFolder(
@@ -74,20 +62,15 @@ public static class ProjectModelExtensions
         string folderName)
     {
         var solution = parentFolder.GetSolution();
-        IProjectFolder? newFolder = null;
+        using var writeLock = solution.Locks.UsingWriteLock();
 
-        solution.Locks.ExecuteWithWriteLock(() =>
-        {
-            // 1. Создаём физическую директорию на диске
-            var folderPath = parentFolder.Location.Combine(folderName);
-            Directory.CreateDirectory(folderPath.FullPath);
+        // 1. Создаём физическую директорию на диске
+        var folderPath = parentFolder.Location.Combine(folderName);
+        Directory.CreateDirectory(folderPath.FullPath);
 
-            // 2. Создаём папку в проектной модели
-            var folderImpl = (ProjectFolderImpl)parentFolder;
-            newFolder = folderImpl.DoCreateFolder(
-                new ProjectFolderPath(folderName, VirtualFileSystemPath.GetEmptyPathFor(InteractionContext.SolutionContext))
-            );
-        });
+        // 2. Создаём папку в проектной модели
+        var editor = solution.GetComponent<IProjectModelEditor>();
+        var newFolder = editor.AddFolder(parentFolder, folderName);
 
         return newFolder!;
     }
@@ -96,7 +79,7 @@ public static class ProjectModelExtensions
     {
         // 1. Получаем решение и PSI сервисы
         var solution = projectFile.GetSolution();
-        using var readLock = solution.Locks.UsingReadLock();
+        using var writeLock = solution.Locks.UsingWriteLock();
         var psiServices = solution.GetPsiServices();
 
         // 2. Конвертируем IProjectFile в IPsiSourceFile

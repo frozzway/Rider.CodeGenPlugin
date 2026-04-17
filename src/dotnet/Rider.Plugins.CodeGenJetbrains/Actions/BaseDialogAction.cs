@@ -1,9 +1,11 @@
 ﻿using JetBrains.Application.DataContext;
+using JetBrains.Application.Threading;
 using JetBrains.Application.UI.Actions;
 using JetBrains.Application.UI.ActionsRevised.Menu;
 using JetBrains.IDE.UI;
 using JetBrains.IDE.UI.Extensions;
 using JetBrains.Lifetimes;
+using JetBrains.ReSharper.Psi;
 using Microsoft.Extensions.DependencyInjection;
 using Rider.Plugins.CodeGenJetbrains.Execution.Abstract;
 
@@ -24,6 +26,10 @@ public abstract class BaseDialogAction<T> : IExecutableAction
         var contextSnapshot = new DataContextSnapshot(context);
 
         var scope = DependencyInjection.ServiceProvider.CreateScope();
+        var compilationContext = CompilationContextCookie.GetExplicitUniversalContextIfNotSet();
+
+        var accessor = scope.ServiceProvider.GetRequiredService<IContextAccessor>();
+        accessor.Initialize(contextSnapshot);
 
         var dialogForm = scope.ServiceProvider.GetRequiredService<IDialogForm<T>>();
         var executor = scope.ServiceProvider.GetRequiredService<IExecutor<T>>();
@@ -33,10 +39,17 @@ public abstract class BaseDialogAction<T> : IExecutableAction
                 dialogForm.GetDialog(lt, context, DialogTitle)
                     .WithOkButton(lt, () =>
                     {
+                        var contextAccessor = scope.ServiceProvider.GetRequiredService<IContextAccessor>();
+                        using var writeLock = contextAccessor.Solution.Locks.UsingWriteLock();
                         executor.Execute(contextSnapshot, dialogForm.GetDto());
                         scope.Dispose();
+                        compilationContext.Dispose();
                     })
-                    .WithCancelButton(lt, () => scope.Dispose()),
+                    .WithCancelButton(lt, () =>
+                    {
+                        scope.Dispose();
+                        compilationContext.Dispose();
+                    }),
             parentLifetime: Lifetime.Eternal
         );
     }

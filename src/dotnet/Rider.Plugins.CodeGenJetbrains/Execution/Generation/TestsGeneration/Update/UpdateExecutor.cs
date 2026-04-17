@@ -1,5 +1,6 @@
 ﻿using Humanizer;
 using JetBrains.ProjectModel;
+using Rider.Plugins.CodeGenJetbrains.Execution.Abstract;
 using Rider.Plugins.CodeGenJetbrains.Extensions;
 using Rider.Plugins.CodeGenJetbrains.FluidModels;
 using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Abstract;
@@ -8,7 +9,7 @@ using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models.Update;
 
 namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.TestsGeneration.Update;
 
-public class UpdateExecutor : BaseExecutor<UpdateTestDto>
+public class UpdateExecutor(IContextAccessor contextAccessor) : BaseExecutor<UpdateTestDto>(contextAccessor)
 {
     protected override string TestModelTemplate => "TestsGeneration.Update.TestModel.cs.liquid";
     protected override string TestCaseTemplate => "TestsGeneration.Update.TestCase.cs.liquid";

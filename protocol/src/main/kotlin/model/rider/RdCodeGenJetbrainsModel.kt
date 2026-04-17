@@ -76,5 +76,8 @@ object RdCodeGenJetbrainsModel : Ext(SolutionModel.Solution) {
         // 4. Получить колонки таблицы
         // Вход: GetColumnsRequest, Выход: Список колонок с типами
         call("getColumns", string, DbTableColumnsDto)
+
+        call("addToVcs", string, bool)
+            .doc("Adds a newly created file to the VCS (e.g. Git) on the frontend side.")
     }
 }

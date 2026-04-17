@@ -10,22 +10,23 @@ namespace Rider.Plugins.CodeGenJetbrains;
 
 public static class DependencyInjection
 {
-    public static ServiceCollection ServiceCollection = [];
-    public static IServiceProvider ServiceProvider;
-    private static bool Initialized;
+    public static readonly ServiceCollection ServiceCollection = [];
+    public static IServiceProvider ServiceProvider = null!;
+    private static bool _initialized;
 
     [rt::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        if (Initialized)
+        if (_initialized)
             return;
 
         Initialize(ServiceCollection);
         ServiceCollection.AddScoped<SolutionTypeElementsAccessor>();
+        ServiceCollection.AddScoped<IContextAccessor, ContextAccessor>();
 
         ServiceProvider = ServiceCollection.BuildServiceProvider();
 
-        Initialized = true;
+        _initialized = true;
     }
 
     public static void Initialize(IServiceCollection services)
@@ -34,6 +35,7 @@ public static class DependencyInjection
 
         RegisterOpenGenericAsImplementedInterfaces(services, assembly, typeof(IExecutor<>));
         RegisterOpenGenericAsImplementedInterfaces(services, assembly, typeof(IDialogForm<>));
+        RegisterSubClassesAsSelf(services, assembly, typeof(MapperGenerationService));
     }
 
     private static void RegisterOpenGenericAsImplementedInterfaces(
@@ -52,5 +54,17 @@ public static class DependencyInjection
             foreach (var serviceType in matchingInterfaces)
                 services.AddScoped(serviceType, implType);
         }
+    }
+
+    private static void RegisterSubClassesAsSelf(
+        IServiceCollection services,
+        Assembly assembly,
+        Type baseType)
+    {
+        var concreteTypes = assembly.GetTypes()
+            .Where(t => t is { IsClass: true, IsAbstract: false } && t.IsSubclassOf(baseType));
+
+        foreach (var implType in concreteTypes)
+            services.AddScoped(implType);
     }
 }

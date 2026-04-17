@@ -1,15 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using JetBrains.Application.DataContext;
-using JetBrains.Application.Threading;
 using JetBrains.ProjectModel;
-using JetBrains.ProjectModel.DataContext;
 using JetBrains.ReSharper.Psi;
-using JetBrains.ReSharper.Psi.CSharp;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
-using JetBrains.ReSharper.Psi.Tree;
-using JetBrains.TextControl;
-using JetBrains.TextControl.DataContext;
 using Rider.Plugins.CodeGenJetbrains.Execution.Abstract;
 using Rider.Plugins.CodeGenJetbrains.Execution.Common;
 using Rider.Plugins.CodeGenJetbrains.Extensions;
@@ -18,44 +11,42 @@ using Rider.Plugins.CodeGenJetbrains.FluidModels.RepositoryGeneration;
 
 namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.RepositoryGeneration;
 
-public class RepositoryGenerationExecutor : IExecutor<RepositoryGenerationDto>
+public class RepositoryGenerationExecutor(IContextAccessor contextAccessor) : IExecutor<RepositoryGenerationDto>
 {
     private const string Template = "RepositoryGeneration.Repository.cs.liquid";
     private const string TemplateMethodPrefix = "RepositoryGeneration.Methods.";
 
     public void Execute(IDataContext context, RepositoryGenerationDto dto)
     {
-        var targetElement = context.GetData(ProjectModelDataConstants.PROJECT_MODEL_ELEMENT);
+        switch (contextAccessor.Target)
+        {
+            case ActionTarget.Folder targetFolder:
+                GenerateImpl(targetFolder.ProjectFolder, dto);
+                break;
 
-        if (targetElement is IProjectFolder folder)
-            GenerateImpl(folder, dto);
-
-        else if (CaretContextUtil.IsCaretInsideCSharpClassButNotMethod(context, out var declaration))
-            GenerateImpl(context, declaration, dto);
-
-        else throw new InvalidOperationException();
+            case ActionTarget.Declaration targetClass:
+                GenerateImpl(contextAccessor.Snapshot, targetClass.ClassDeclaration, dto);
+                break;
+        }
     }
 
-    private static void GenerateImpl(
+    private void GenerateImpl(
         IDataContext context,
         IClassLikeDeclaration declaration,
         RepositoryGenerationDto dto)
     {
         var model = ToFModel(dto);
-        declaration.GetSolution().Locks.ExecuteWithReadLock(() =>
-        {
-            declaration.GetPsiServices().Transactions.Execute(
-                "Generate Repository Method",
-                () =>
+        contextAccessor.PsiServices.Transactions.Execute(
+            "Generate Repository Method",
+            () =>
+            {
+                foreach (var method in dto.Methods)
                 {
-                    foreach (var method in dto.Methods)
-                    {
-                        var template = TemplateMethodPrefix + method + ".cs.liquid";
-                        var renderer = new FluidRenderer(model, template);
-                        declaration.AddMethodAtCaret(context, renderer.RenderContent());
-                    }
-                });
-        });
+                    var template = TemplateMethodPrefix + method + ".cs.liquid";
+                    var renderer = new FluidRenderer(model, template);
+                    declaration.AddMethodAtCaret(context, renderer.RenderContent());
+                }
+            });
 
         declaration.GetSourceFile()!.ToProjectFile()!.FixImportsInFile();
     }

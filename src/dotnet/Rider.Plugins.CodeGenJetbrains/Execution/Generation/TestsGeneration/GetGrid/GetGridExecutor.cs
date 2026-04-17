@@ -1,6 +1,6 @@
 ﻿using Humanizer;
 using JetBrains.ProjectModel;
-using Rider.Plugins.CodeGenJetbrains.Execution.Generation.TestsGeneration.GetGrid;
+using Rider.Plugins.CodeGenJetbrains.Execution.Abstract;
 using Rider.Plugins.CodeGenJetbrains.Extensions;
 using Rider.Plugins.CodeGenJetbrains.FluidModels;
 using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Abstract;
@@ -9,12 +9,21 @@ using Rider.Plugins.CodeGenJetbrains.FluidModels.TestsGeneration.Models.GetGrid;
 
 namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.TestsGeneration.GetGrid;
 
-public class GetGridExecutor : BaseExecutor<GetGridTestDto>
+public class GetGridExecutor(
+    IContextAccessor contextAccessor,
+    GetGridMapperGenerationService mapperService)
+    : BaseExecutor<GetGridTestDto>(contextAccessor)
 {
     protected override string TestModelTemplate => "TestsGeneration.GetGrid.TestModel.cs.liquid";
     protected override string TestCaseTemplate => "TestsGeneration.GetGrid.TestCase.cs.liquid";
     protected override string BaseTestTemplate => "TestsGeneration.GetGrid.BaseTests.cs.liquid";
     protected override string SubFolderName => "GetGrid";
+
+    protected override void PreGenerationImpl(IProjectFolder targetFolder, GetGridTestDto dto)
+    {
+        if (dto.Entity is not null)
+            mapperService.AddMapperMethods(dto.Entity.ShortName, [""]);
+    }
 
     protected override FTest ToFModel(GetGridTestDto dto, IProjectFolder targetFolder, IProjectFolder testCasesFolder)
     {

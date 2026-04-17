@@ -28,7 +28,7 @@ public static class EndpointCompletionExtensions
         Lifetime lifetime,
         Func<IHttpEndpoint, bool>? filter = null)
     {
-        var allRoutes = GetAllRoutes(solution, filter);
+        var allRoutes = solution.GetAllRoutes(filter);
 
         return textBox.WithSimpleCompletion(
             lifetime,
@@ -106,11 +106,11 @@ public static class EndpointCompletionExtensions
     {
         filter ??= _ => true;
 
-        var endpointsProvider = solution.GetComponent<IHttpEndpointsProvider>();
-        var roots = endpointsProvider.GetEndpointsTreeRoots();
+        var endpointsProviders = solution.GetComponents2<IHttpEndpointsProvider>();
+        var roots = endpointsProviders.SelectMany(p => p.GetEndpointsTreeRoots());
 
         // Получаем плоский список IHttpEndpoint
-        var httpEndpoints = FlattenRoutes(roots)
+        var httpEndpoints = roots.FlattenRoutes()
             .OfType<IHttpEndpoint>()
             .Where(filter);
 
@@ -131,9 +131,9 @@ public static class EndpointCompletionExtensions
     {
         filter ??= _ => true;
 
-        var endpointsProvider = solution.GetComponent<IHttpEndpointsProvider>();
-        var roots = endpointsProvider.GetEndpointsTreeRoots();
-        var allRoutes = FlattenRoutes(roots)
+        var endpointsProviders = solution.GetComponents2<IHttpEndpointsProvider>();
+        var roots = endpointsProviders.SelectMany(p => p.GetEndpointsTreeRoots());
+        var allRoutes = roots.FlattenRoutes()
             .OfType<IHttpEndpoint>()
             .Where(filter)
             .Select(BuildRouteString)
@@ -157,7 +157,7 @@ public static class EndpointCompletionExtensions
             }
 
             // 2. Рекурсивно спускаемся в дочерние узлы
-            foreach (var route in FlattenRoutes(node.Children))
+            foreach (var route in node.Children.FlattenRoutes())
             {
                 yield return route;
             }

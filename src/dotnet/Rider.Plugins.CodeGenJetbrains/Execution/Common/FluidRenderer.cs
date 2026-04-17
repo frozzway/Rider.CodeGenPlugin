@@ -1,8 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
-using Fluid;
 using Microsoft.Extensions.FileProviders;
+using Rider.Plugins.CodeGenJetbrains.Extensions;
 
 namespace Rider.Plugins.CodeGenJetbrains.Execution.Common;
 
@@ -10,9 +9,10 @@ public class FluidRenderer(object templateModel, string templateResourceName)
 {
     private static readonly Assembly ResourcesAssembly = Assembly.GetAssembly(typeof(FluidRenderer))!;
     private static readonly string ResourcesPrefix = $"{ResourcesAssembly.GetName().Name}.Templates";
+    private readonly EmbeddedFileProvider _fileProvider = new(ResourcesAssembly, ResourcesPrefix);
 
     private readonly string _templateText = LoadTemplate(templateResourceName);
-    public string RenderContent() => RenderContent(_templateText, templateModel);
+    public string RenderContent() => FluidExtensions.RenderContent(_templateText, templateModel, _fileProvider);
 
     private static string LoadTemplate(string templateResourceName)
     {
@@ -30,21 +30,5 @@ public class FluidRenderer(object templateModel, string templateResourceName)
 
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
-    }
-
-    private static string RenderContent(string templateText, object templateModel)
-    {
-        var parser = new FluidParser();
-        if (!parser.TryParse(templateText, out var template, out var error))
-            throw new ArgumentException($"Parse error: {error}");
-
-        var options = new TemplateOptions
-        {
-            MemberAccessStrategy = new UnsafeMemberAccessStrategy { IgnoreCasing = true },
-            FileProvider = new EmbeddedFileProvider(ResourcesAssembly, ResourcesPrefix)
-        };
-
-        var context = new TemplateContext(templateModel, options);
-        return template.Render(context);
     }
 }

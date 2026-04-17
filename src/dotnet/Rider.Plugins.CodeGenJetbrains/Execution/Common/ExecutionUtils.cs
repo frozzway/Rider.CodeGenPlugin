@@ -36,11 +36,10 @@ public static class ExecutionUtils
     public static IClass? FindEntityByControllerName(
         this string controllerName,
         IReadOnlyCollection<IClass> classes)
-        => controllerName
-            .TrimFromStart("Admin")
-            .TrimFromEnd("Controller")
-            .Singularize()
-            .FindEntityByName(classes);
+    {
+        var trimmed = controllerName.TrimFromStart("Admin").TrimFromEnd("Controller");
+        return trimmed.Singularize().FindEntityByName(classes) ?? trimmed.FindEntityByName(classes);
+    }
 
     public static IClass? FindEntityByName(
         this string targetEntityName,

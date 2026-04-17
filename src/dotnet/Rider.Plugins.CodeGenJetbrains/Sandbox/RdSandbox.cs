@@ -1,8 +1,4 @@
-﻿using System;
-using JetBrains.ProjectModel;
-using JetBrains.Rd.Tasks;
-using JetBrains.ReSharper.Feature.Services.Protocol;
-using Rider.Plugins.CodeGenJetbrains.Model;
+﻿using JetBrains.ProjectModel;
 
 namespace Rider.Plugins.CodeGenJetbrains.Sandbox;
 
