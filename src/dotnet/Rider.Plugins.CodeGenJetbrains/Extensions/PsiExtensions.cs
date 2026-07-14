@@ -41,7 +41,7 @@ public static class PsiExtensions
 
         using var readLock = element.GetSolution().Locks.UsingReadLock();
         using var compilationContext = CompilationContextCookie.GetExplicitUniversalContextIfNotSet();
-        var xmlDoc = element.GetXMLDoc(inherit: false);
+        var xmlDoc = element.GetXMLDoc(false);
         var summaryNode = xmlDoc?.SelectSingleNode("summary");
         return summaryNode?.InnerText.Trim();
     }

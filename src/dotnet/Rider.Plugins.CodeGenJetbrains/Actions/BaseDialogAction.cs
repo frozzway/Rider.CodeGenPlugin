@@ -2,6 +2,7 @@
 using JetBrains.Application.Threading;
 using JetBrains.Application.UI.Actions;
 using JetBrains.Application.UI.ActionsRevised.Menu;
+using JetBrains.Diagnostics;
 using JetBrains.IDE.UI;
 using JetBrains.IDE.UI.Extensions;
 using JetBrains.Lifetimes;
@@ -48,9 +49,20 @@ public abstract class BaseDialogAction<T> : IExecutableAction
                     .WithCancelButton(lt, () =>
                     {
                         scope.Dispose();
-                        compilationContext.Dispose();
+                        DisposeCompilationContext(compilationContext);
                     }),
             parentLifetime: Lifetime.Eternal
         );
+    }
+
+    private static void DisposeCompilationContext(CompilationContextCookie compilationContext)
+    {
+        try
+        {
+            compilationContext.Dispose();
+        }
+        catch (Assertion.AssertionException)
+        {
+        }
     }
 }

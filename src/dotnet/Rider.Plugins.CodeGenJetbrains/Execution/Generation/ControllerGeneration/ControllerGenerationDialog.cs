@@ -7,8 +7,6 @@ using JetBrains.DataFlow;
 using JetBrains.IDE.UI;
 using JetBrains.IDE.UI.Extensions;
 using JetBrains.Lifetimes;
-using JetBrains.ProjectModel;
-using JetBrains.ProjectModel.DataContext;
 using JetBrains.ReSharper.Psi;
 using JetBrains.ReSharper.Psi.CSharp.Tree;
 using JetBrains.Rider.Model.UIAutomation;
@@ -19,7 +17,8 @@ using Rider.Plugins.CodeGenJetbrains.Extensions;
 
 namespace Rider.Plugins.CodeGenJetbrains.Execution.Generation.ControllerGeneration;
 
-public class ControllerGenerationDialog(SolutionTypeElementsAccessor typeElementsAccessor) : IDialogForm<ControllerGenerationDto>
+public class ControllerGenerationDialog(
+    SolutionTypeElementsAccessor typeElementsAccessor) : IDialogForm<ControllerGenerationDto>
 {
     private const string DefaultControllerName = "MyController";
     private const string DefaultPermissionEnum = "PermissionCode";
@@ -35,7 +34,6 @@ public class ControllerGenerationDialog(SolutionTypeElementsAccessor typeElement
         ControllerMethods.GetManyAsync
     ];
 
-    private ISolution _solution = null!;
     private InputField<string> _nameInput = null!;
     private InputField<string> _entitySummaryInput = null!;
     private SearchableClassPicker _entityPicker = null!;
@@ -47,11 +45,7 @@ public class ControllerGenerationDialog(SolutionTypeElementsAccessor typeElement
         IDataContext context,
         string title)
     {
-        _solution = context.GetData(ProjectModelDataConstants.SOLUTION)
-                    ?? throw new InvalidOperationException();
-
         CaretContextUtil.IsCaretInsideCSharpClassButNotMethod(context, out var declaration);
-
         return GetDialogImpl(lifetime, context, declaration, title);
     }
 

@@ -61,7 +61,7 @@ public static class QuickFixesExtensions
             null,
             NullProgressIndicator.Create()
         );
-        new ImportMethodFix(seedRef).ExecuteAction(
+        new ImportExtensionMemberFix(seedRef).ExecuteAction(
             solution,
             scope,
             null,
@@ -95,7 +95,7 @@ public static class QuickFixesExtensions
                 parentIndicator.TaskName = "Importing extension methods...";
                 using (var subProgress = parentIndicator.AdvanceNested(1))
                 {
-                    new ImportMethodFix(seedRef).ExecuteAction(
+                    new ImportExtensionMemberFix(seedRef).ExecuteAction(
                         solution,
                         scope,
                         null,

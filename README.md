@@ -25,7 +25,7 @@ Suite, Model, Case и Theory классы
 ## Установка
 Через [кастомный репозиторий][custom_repo_doc] плагинов установить плагин с наименованием **RiderCodeGen**
 ```url
-https://storage.easycdn.ru/jetbrains-plugins/plugin-list.xml
+https://storage.fi.exios.site/jetbrains-plugins/plugin-list.xml
 ```
 
 

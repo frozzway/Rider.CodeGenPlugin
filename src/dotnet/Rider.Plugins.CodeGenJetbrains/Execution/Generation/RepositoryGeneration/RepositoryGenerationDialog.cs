@@ -79,7 +79,7 @@ public class RepositoryGenerationDialog(SolutionTypeElementsAccessor classesAcce
             values: _methods,
             headerText: "Methods",
             presentation: (value, _) => value.GetBeLabel(),
-            checkedByDefault: true,
+            checkedByDefault: false,
             joinCheckBoxAndFirstColumn: true);
 
         grid.AddElement(_methodList.Grid);

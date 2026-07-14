@@ -20,7 +20,7 @@ public static class ProjectModelExtensions
         var protocolSolution = solution.GetProtocolSolution();
         var fileSystemModel = protocolSolution.GetFileSystemModel();
         var path = item.Location.FullPath;
-        fileSystemModel.RefreshPaths.Start(new RdFsRefreshRequest([path], async: true));
+        fileSystemModel.RefreshPaths.Start(new RdFsRefreshRequest([new RdPath("", path)], async: true));
         return item;
     }
 

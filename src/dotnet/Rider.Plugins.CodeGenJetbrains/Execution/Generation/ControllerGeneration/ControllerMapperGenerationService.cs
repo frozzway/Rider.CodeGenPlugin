@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Rider.Plugins.CodeGenJetbrains.Execution.Abstract;
 using Rider.Plugins.CodeGenJetbrains.Execution.Common;
 
@@ -11,21 +12,25 @@ public class ControllerMapperGenerationService(
 {
     protected override string MapperClassPostfix => "MapperApi";
 
-    protected override string GetMapperMethodContent(string methodName, string entityName)
+    protected override IEnumerable<string> GetMapperMethodsContent(string methodName, string entityName)
         => methodName switch
         {
             ControllerMethods.AddAsync
-                => $"public static partial Add{entityName}Command ToCreateCommand(this Add{entityName}Request request);",
+                => [$"public static partial Add{entityName}Command ToCreateCommand(this Add{entityName}Request request);"],
             ControllerMethods.UpdateAsync
-                => $"public static partial Update{entityName}Command ToUpdateCommand(this Update{entityName}Request request, Guid id);",
+                => [$"public static partial Update{entityName}Command ToUpdateCommand(this Update{entityName}Request request, Guid id);"],
             ControllerMethods.GetGridAsync
-                => $"public static partial {entityName}GridResponse ToGridResponse(this {entityName}Grid item);",
+                =>
+                [
+                    $"public static partial {entityName}GridResponse ToGridResponse(this {entityName}Grid item);",
+                    $"public static partial Get{entityName}GridQuery ToGridQuery(this Get{entityName}GridRequest request);"
+                ],
             ControllerMethods.GetExcelAsync
-                => $"public static partial Get{entityName}GridExcelQuery ToExcelQuery(this Get{entityName}GridExcelRequest request);",
+                => [$"public static partial Get{entityName}GridExcelQuery ToExcelQuery(this Get{entityName}GridExcelRequest request);"],
             ControllerMethods.GetAsync
-                => $"public static partial {entityName}Response ToResponse(this {entityName} entity);",
+                => [$"public static partial {entityName}Response ToResponse(this {entityName} entity);"],
             ControllerMethods.GetManyAsync
-                => $"public static partial {entityName}Response ToResponse(this {entityName} entity);",
+                => [$"public static partial {entityName}Response ToResponse(this {entityName} entity);"],
             _ => throw new ArgumentOutOfRangeException(nameof(methodName), methodName, null)
         };
 }

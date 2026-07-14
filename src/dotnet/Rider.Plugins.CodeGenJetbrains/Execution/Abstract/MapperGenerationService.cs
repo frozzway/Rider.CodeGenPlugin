@@ -97,7 +97,7 @@ public abstract class MapperGenerationService(
         var psiSourceFile = mapperFile.ToSourceFile()!;
 
         contextAccessor.PsiServices.Files.CommitAllDocuments();
-        var csharpFile = (ICSharpFile)psiSourceFile.GetDominantPsiFile<CSharpLanguage>()! ;
+        var csharpFile = (ICSharpFile)psiSourceFile.GetDominantPsiFile<CSharpLanguage>()!;
         return csharpFile.Descendants<IClassLikeDeclaration>().First();
     }
 
@@ -110,13 +110,17 @@ public abstract class MapperGenerationService(
         var existingMethods = declaration.MethodDeclarations.ToList();
         foreach (var methodName in methods)
         {
-            var content = GetMapperMethodContent(methodName, entityName: entityName);
-            var methodInstance = (IMethodDeclaration)factory.CreateTypeMemberDeclaration(content);
+            var contents = GetMapperMethodsContent(methodName, entityName: entityName);
 
-            if (!methodInstance.HasMatchingSignature(existingMethods))
-                declaration.AddClassMemberDeclaration(methodInstance);
+            foreach (var content in contents)
+            {
+                var methodInstance = (IMethodDeclaration)factory.CreateTypeMemberDeclaration(content);
+
+                if (!methodInstance.HasMatchingSignature(existingMethods))
+                    declaration.AddClassMemberDeclaration(methodInstance);
+            }
         }
     }
 
-    protected abstract string GetMapperMethodContent(string methodName, string entityName);
+    protected abstract IEnumerable<string> GetMapperMethodsContent(string methodName, string entityName);
 }
