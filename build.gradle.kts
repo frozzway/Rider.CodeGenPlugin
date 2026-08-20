@@ -45,15 +45,27 @@ val riderSdkPath by lazy {
     return@lazy path
 }
 
+val mainIntellijPlatform = intellijPlatform
+
 dependencies {
     intellijPlatform {
         rider(libs.versions.riderSdk) {
             useInstaller = false
         }
+
         jetbrainsRuntime()
+
+        bundledModule("intellij.rider.rdclient.dotnet")
+
         testFramework(TestFrameworkType.Bundled)
         bundledPlugin("com.intellij.database")
     }
+
+    compileOnly(fileTree(provider<java.io.File> {
+        mainIntellijPlatform.platformPath.resolve("lib").toFile()
+    }) {
+        include("**/*.jar")
+    })
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test)

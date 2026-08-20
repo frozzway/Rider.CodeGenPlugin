@@ -50,4 +50,5 @@ public class DataContextSnapshot : IDataContext
 
     public DataContextState? State { get; }
     public bool IsEmpty => _snapshot.Count == 0;
+    public bool AllowSkipReadLock => false;
 }
